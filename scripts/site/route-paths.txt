@@ -21,6 +21,8 @@
 /auth/set/zh
 /cache/getting-started/en
 /cache/getting-started/zh
+/cache/interceptor/en
+/cache/interceptor/zh
 /cache/service/en
 /cache/service/zh
 /chart/bar/en
@@ -117,8 +119,6 @@
 /components/page-header/zh
 /components/pdf/en
 /components/pdf/zh
-/components/qr/en
-/components/qr/zh
 /components/quick-menu/en
 /components/quick-menu/zh
 /components/result/en
