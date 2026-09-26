@@ -1,6 +1,6 @@
 ﻿# @delon/* Component Documentation (English)
 
-This file contains aggregated content from all component docs. Total 92 components.
+This file contains aggregated content from all component docs. Total 106 components.
 
 ---
 
@@ -69,7 +69,7 @@ Commonly used testing suite.
 
 Schematic diagram of directory structure：
 
-```
+```txt
 ├── _mock                                       # Mock Data rule
 ├── src
 │   ├── app
@@ -193,7 +193,7 @@ View the analyze page:
 npm run analyze:view
 ```
 
-![](./assets/screenshot/bundle-size.png)
+![Bundle Size](./assets/screenshot/bundle-size.png)
 
 ## Release
 
@@ -277,7 +277,7 @@ Therefore, by default you can place the certificate in the `_nginx/ssl` director
 
 Finally, add the `ports` node of `docker-compose.yml`:
 
-```
+```yaml
 - 443:443
 ```
 
@@ -366,7 +366,7 @@ type: Documents
 
 Ant Design allows you to customize some basic design aspects in order to meet the needs of UI diversity from business and brand, including primary color, border radius, border color, etc.
 
-![](https://zos.alipayobjects.com/rmsportal/zTFoszBtDODhXfLAazfSpYbSLSEeytoG.png)
+![Example](https://zos.alipayobjects.com/rmsportal/zTFoszBtDODhXfLAazfSpYbSLSEeytoG.png)
 
 ## Less variables
 
@@ -507,7 +507,7 @@ export class DashboardAnalysisComponent {}
 ```less
 // analysis.component.less
 @import '@delon/theme/index';
-:host ::ng-deep { 
+:host ::ng-deep {
   color: @text-color;
 }
 ```
@@ -586,6 +586,7 @@ export function withTestWidget(): SFWidgetProvideConfig {
     <!-- Start area -->
     <tinymce
       [ngModel]="value"
+      [ngModelOptions]="{ standalone: true }"
       (ngModelChange)="change($event)"
       [config]="config"
       [loading]="loading">
@@ -620,13 +621,23 @@ class TestWidget extends ControlWidget implements OnInit {
 }
 ```
 
+**ngModel and form registration**
+
+The `ngModel` inside a widget template is only a local binding synchronized with `FormProperty`, it neither needs nor should be registered with any form, so it must be declared as `standalone`; otherwise Angular v22 reports a `NG01354` warning in the console.
+
+> Note: Do not follow that warning and add `viewProviders: [{ provide: ControlContainer, useExisting: NgForm }]`: it makes `ngModel` try to register with the internal form of SF, and since it has no `name`, it throws `NG01352` immediately.
+
 **sf-item-wrap**
 
 Wrap your custom content in the template with the `sf-item-wrap` component, which encapsulates the form base elements internally.
 
 **Change detection**
 
-The widget is manually trigger changed detection during the rendering process. In most cases, the `ControlWidget` is well manage of changing detection. but the asynchronous operation may be encountered, you can call the `detectChanges()` method to trigger a change detection of the widget.
+Widget state is fully signal-driven: `ui` / `schema` are reactive objects, and your own state should use `signal`.
+Therefore **manual change detection is no longer needed** (`detectChanges()` has been removed) — the view refreshes automatically.
+
+> Note: `ui` / `schema` must be **replaced as a whole** (e.g. `ui.optionalHelp = { ...ui.optionalHelp, text }`);
+> mutating nested structures in place (e.g. `schema.enum.push(...)`) is not tracked.
 
 ### Register
 
@@ -931,8 +942,7 @@ You can get a specific attribute of Schema by calling `getProperty` function, th
 const statusProperty = this.sf.getProperty('/status')!;
 statusProperty.schema.enum = ['1', '2', '3'];
 statusProperty.widget.reset('2');
-// Or manually trigger `detectChanges`
-// statusProperty.widget.detectChanges();
+// No manual change detection needed: signal-driven state refreshes automatically
 ```
 
 If just only update a element value, then:
@@ -960,7 +970,7 @@ schema: SFSchema = {
 
 Since the `format:'month'` here is not a Json Schema standard, you can get an error in the Console panel:
 
-```
+```txt
 Error: unknown format "month" ignored in schema at path "#/properties/month"
 ```
 
@@ -978,7 +988,7 @@ const alainConfig: AlainConfig = {
 ## How to toggle show or hide an element
 
 ```ts
-this.sf.getProperty('/mobile')?.setVisible(status).widget.detectChanges();
+this.sf.getProperty('/mobile')?.setVisible(status);
 ```
 
 ---
@@ -992,6 +1002,8 @@ type: Documents
 ## How to auto-resize of the container?
 
 The G2 uses `window.addEventListener('resize', this.onResize)` to detect a change in parent dom element's size. So you need to manually monitor the change in the size of the container and call `chart.forceFit()` to force resize.
+
+> **Since v5, `forceFit()` returns a `Promise`** (it was synchronous in v4): use `await chart.forceFit()` or `void chart.forceFit()`. Components already handle `autoFit` on the first frame and on window resize, so manual calls are rarely needed.
 
 [comment]: <demo(resizable)>
 
@@ -1145,7 +1157,7 @@ npm start
 
 NG-ALAIN is a standard Angular CLI project that includes common routes for admins and demonstrates our component library. The project layout is as follows:
 
-```
+```txt
 ├── _mock                                       # Mock Data rule
 ├── src
 │   ├── app
@@ -1180,7 +1192,7 @@ npm start
 
 This will automatically open [http://localhost:4200](http://localhost:4200). If you see the following page then you have succeeded.
 
-![](./assets/screenshot/desktop.png | width=700)
+![Desktop](./assets/screenshot/desktop.png | width=700)
 
 ## Environment Support
 
@@ -1652,7 +1664,25 @@ title: Getting Started
 type: Documents
 ---
 
-Chart provides the well-designed abstract chart components based on the [G2](https://antv.alipay.com/zh-cn/g2/3.x/index.html). These components provide the ability to use with complex mixed view or just use along for common business usage.
+Chart provides the well-designed abstract chart components based on the [G2](https://g2.antv.antgroup.com/en/).
+
+## Upgrading from v4 to v5
+
+`@antv/g2` has been upgraded from v4 to **v5** (`^5.4.8`). Component APIs (`[data]`, `[height]`, `[padding]`, `[theme]`, `(ready)`, `(clickItem)`, ...) keep their **names and types** (the only exception is `g2-water-wave`, whose `[height]` is renamed to `[size]`), but rendering is now **asynchronous and spec-driven**:
+
+- **Rendering is async**: `ready` fires on the **first `AFTER_RENDER`** (the first frame is really painted) and **only once**; `loaded` (used by the template to drop the skeleton) is set at the same moment. Subscribe to `(ready)` to get the chart instance:
+  ```html
+  <g2-bar [data]="data()" (ready)="onReady($event)" (error)="onError($event)" />
+  ```
+- **Failure is a separate layer from `ready`**: a missing G2 library or a failed render emits **`(error)`** (plus `console.error`); `ready` does not fire and the skeleton stays.
+- **`install()` is no longer public**: use the protected `afterCreate(chart)` / `onRendered()` extension points; use `changeData()` for data updates (it goes through the base class' serial queue, so it cannot race the first frame).
+- **Interactions**: v4's `active-region` and `drag-move` have no v5 equivalent and degrade to no interaction.
+- **tooltip**: `domStyles`/`itemTpl` are gone; a **view-level `tooltip` is not inherited by child marks** — set it at the mark level.
+- **Click payload type**: `Event` → `G2Event` (`ev.data?.data` is the datum).
+- **`g2-tag-cloud`**: no longer writes `x/y/size/rotate/font` back into the data rows (layout is done by the built-in `wordCloud` mark; `@antv/data-set` has been removed).
+- **`g2-water-wave`**: the hand-written v4 canvas is replaced by the v5 [`liquid`](https://g2.antv.antgroup.com/examples/general/Liquid) mark (the center percentage is drawn by G2's built-in text); **`[height]` is renamed to `[size]`** (the side length of the square); `[animate]` now controls **only the enter animation** (the wave motion is built into G2 and always runs) and sizing is handled by `autoFit`.
+- **Fixed bar thickness with a transposed coordinate**: with `coordinate.transform: [{ type: 'transpose' }]` the interval's **on-screen thickness is clamped by `style.minWidth`/`maxWidth` (pixels)** while `minHeight` clamps the on-screen width — so v4's `.size(30)` cannot be reproduced with `encode.size` alone; also write `style: { minWidth: 30, maxWidth: 30 }`.
+ These components provide the ability to use with complex mixed view or just use along for common business usage.
 
 ## Usage
 
@@ -1666,8 +1696,7 @@ const alainConfig: AlainConfig = {
   chart: { 
     // The following is the default configuration. If the project cannot be accessed from the Internet, you can directly use the `./assets***` path for the dependent package according to the `angular.json` configuration
     libs: [
-      'https://gw.alipayobjects.com/os/lib/antv/g2/4.1.4/dist/g2.min.js',
-      'https://gw.alipayobjects.com/os/lib/antv/data-set/0.11.7/dist/data-set.js',
+      'https://gw.alipayobjects.com/os/lib/antv/g2/5.4.8/dist/g2.min.js',
     ],
   },
 };
@@ -1699,11 +1728,6 @@ You can also configure the `assets` (About [assets](https://angular.io/guide/wor
     "glob": "**/*",
     "input": "./node_modules/@antv/g2/dist",
     "output": "/@antv/g2/"
-  },
-  {
-    "glob": "**/*",
-    "input": "./node_modules/@antv/data-set/dist",
-    "output": "/@antv/data-set/"
   }
 ]
 ```
@@ -1714,10 +1738,7 @@ Finally modify the `libs` parameter of the global configuration:
 // global-config.module.ts
 const alainConfig: AlainConfig = {
   chart: { 
-    libs: [
-      './assets/@antv/g2/g2.min.js',
-      './assets/@antv/data-set/data-set.js',
-    ],
+    libs: ['./assets/@antv/g2/g2.min.js'],
   },
 };
 ```
@@ -2248,7 +2269,7 @@ As you begin your business development on NG-ALAIN, i recommend that you first r
 
 + [Ant Design Guide article](//ant.design/docs/spec/introduce)
 + [Ant Design for Angular](//ng.ant.design/)
-+ [Antv chart - G2](//www.yuque.com/antv/g2-docs-en?language=en-us)
++ [Antv chart - G2](https://g2.antv.antgroup.com/en/)
 + [NG-ZORRO Community recommendation](https://ng.ant.design/docs/recommendation/en)
 
 NG-ALAIN's base component library comes from NG-ZORRO, so you can get a very detailed [API](//ng.ant.design/) documentation for its use on the official website. For ng components provided by -alain are obtained through the [component page](/components).
@@ -3302,7 +3323,7 @@ ng g ng-alain:list list -m=trade
 
 In general, a module might includes the same type of business page, and its file structure might like this:
 
-```
+```txt
 sys
   log
     view
@@ -3341,7 +3362,7 @@ In addition to the default, you can also customize the project-level business pa
 
 For example, to create a custom edit page template, you only need to create the following directory structure in the project's root directory (You can get it via [Github](https://github.com/ng-alain/ng-alain/tree/master/_cli-tpl)):
 
-```
+```txt
 └── _cli-tpl
 │   └── edit                                                       // Your template name
 │       └── __path__                                               // (name fixed value)
@@ -3390,7 +3411,7 @@ These variables or methods can be used in templates, for example: `<%=componentN
 
 The `tpl` command allows you to process the data further before generating the file, The command will check the `_cli-tpl/_fix.js` file during execution and call the `fix` method, which must return a `Promise` object, for example:
 
-> **Note: ** CLI is a Node JS program, so the syntax is based on Node JS.
+> **Note:** CLI is a Node JS program, so the syntax is based on Node JS.
 
 ```js
 function fix(options) {
@@ -3933,7 +3954,7 @@ ui = {
 
 We think a complete form should include some of following elements:
 
-![](./assets/img/form-input.png)
+![From Input](./assets/img/form-input.png)
 
 Description from left to right:
 
@@ -4379,6 +4400,10 @@ When all `path`s have a fixed output format, such as success and exceptions have
 
 If an interceptor is used to handle exception messages, when subscribing only needs to always get the data of the `result` field, it can be solved by specifying `--responseDataField="result"`.
 
+### Code style
+
+Generated files start with `/* eslint-disable */` and `/* eslint-enable prettier/prettier */`: the former keeps generated code away from every other lint rule, the latter hands formatting back to the project's own `prettier/prettier` rule. Run `eslint --fix` (the scaffold already does this on commit through lint-staged, or let your IDE do it on save) to align the generated code with the project code style.
+
 ---
 
 ---
@@ -4543,10 +4568,10 @@ ng-alain believes that these styles tool only using in the content area. Built o
 | ---- | --- | --- | --- |
 | `xs` | $gutter / 2 | `4px` | Smaller |
 | `sm` | $gutter | `8px` | Small |
-| `md` | $gutter * 2 | `16px` | Medium |
-| `lg` | $gutter * 3 | `24px` | Large |
-| `xl` | $gutter * 4 | `32px` | Extra Large |
-| `xxl` | $gutter * 6 | `48px` | Oversized |
+| `md` | $gutter *2 | `16px` | Medium |
+| `lg` | $gutter* 3 | `24px` | Large |
+| `xl` | $gutter *4 | `32px` | Extra Large |
+| `xxl` | $gutter* 6 | `48px` | Oversized |
 
 According these rules, derived from `margin`，`padding`, and naming rules as follows:
 
@@ -4833,7 +4858,7 @@ Like Bootstrap responsive rules, all apply `hidden-xs` classes are hidden when s
 
 ## Rotate
 
-```
+```css
 .rotate-[360 / 15]
 ```
 
@@ -4952,35 +4977,42 @@ After subscribing to `refresh`, the token will be automatically triggered when i
 ---
 order: 1000
 type: Basic
-title: Upgrade to version 21.0
+title: Upgrade to version 22.0
 ---
 
-> This guide applies to the current version ng-alain >= `20`;
-> If you encounter problems during the upgrade process, feel free to comment here.
-> If you find any errors in this guide, please point out
-> Or you have encountered a new problem and solved it, welcome to comment here.
+> This guide applies to the current version of NG-ALAIN >= `21`;
+> If you encounter any problems during the upgrade, feel free to ask. Before asking questions, please read [How to Ask Questions in the Open Source Community](https://github.com/seajs/seajs/issues/545)
+> If you find any omissions or errors in this guide, please point them out!
+> Or, if you encounter a new problem and have found a solution, feel free to contribute!
 
-## Before upgrade
+## Before You Start
 
-1. Make sure `Node.js` >= `22.21.1`.
-2. Create a new branch, or use other methods to back up the current project.
-3. Delete the `package-lock.json` or `yarn.lock` file.
+1. First, make sure your `Node.js` version is compatible with the [Angular version compatibility](https://angular.dev/reference/versions)
+2. Create a new branch, or back up your current project in another way
+3. Delete the `package-lock.json`, `yarn.lock`, or `pnpm-lock.yaml` file from the project
 
-### 1.Upgrade dependencies
+## Upgrade Steps
 
-- Upgrade Angular to 21.x version, Run `ng update @angular/core@21 @angular/cli@21 angular-eslint@21 ng-zorro-antd@21 ng-alain@21`.
-- _Run `ng update @angular/cdk@21`, if you have used `@angular/cdk`._
+### Upgrade Related Dependencies
 
-> NG-ALAIN scaffolding upgrade all change files, please refer to: [#2593](https://github.com/ng-alain/ng-alain/pull/2593/files).
+- To upgrade the project to Angular 22, run `ng update @angular/core@22 @angular/cli@22 angular-eslint@22 ng-zorro-antd@22 ng-alain@22`.
+- _If you are using `@angular/cdk` separately, run `ng update @angular/cdk@22`_
 
-### 2. ng-zorro-antd BREAKING CHANGES
+> > For all changed files related to the NG-ALAIN starter project upgrade, please refer to [#2593](https://github.com/ng-alain/ng-alain/pull/2593/files).
 
-Please note that NG-ZORRO has BREAKING CHANGES; please refer to
-https://github.com/NG-ZORRO/ng-zorro-antd/releases/tag/21.0.0 for details.
+### 2. NG-ZORRO BREAKING CHANGES
 
-### 3. Reference
+Please note that NG-ZORRO contains BREAKING CHANGES; for details, please refer to [22.0.0](
+https://github.com/NG-ZORRO/ng-zorro-antd/releases/tag/22.0.0).
 
-- Code style configuration change [#2594](https://github.com/ng-alain/ng-alain/pull/2594/files)
+### 3. Optional
+
+- Set `pnpm` as the project's `packageManager`
+- Remove the `baseUrl` configuration from `tsconfig.json`
+
+### 4. References
+
+- Code style configuration changes [#2636](https://github.com/ng-alain/ng-alain/pull/2636/files)
 
 ---
 
@@ -5240,7 +5272,7 @@ JSON Schema has strong requirement on format, for example, date must follow the 
 
 `format` is an invalid format of date, detailed validation error information will be shown in console when `debug: true` is set.
 
-```
+```txt
 Error: unknown format "yyyy-MM-dd HH:mm:ss" is used in schema at path "#/properties/time"
 ```
 
@@ -5317,7 +5349,7 @@ http.get(`http://192.168.1.100/api/app`).subscribe();
 
 The following error is returned directly:
 
-```
+```txt
 Access to XMLHttpRequest at 'http://192.168.1.100/api/app' from origin 'http://localhost:4200' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 ```
 
@@ -5381,7 +5413,7 @@ date-fns supports different kinds of time formats, such as:
 
 Output:
 
-```
+```txt
 2017年08月24日
 ```
 
@@ -5999,6 +6031,8 @@ Every select triggers a HTTP request, data source is from `asyncData`; includes 
 |----------|-------------|------|---------|
 | `[asyncData]` | Asynchronous static data source | `(node: NzCascaderOption, index: number, me: CascaderWidget) => PromiseLike<any>` | - |
 | `[size]` | Size, equals to `nzSize` | `string` | - |
+| `[variant]` | Variant | `outlined,borderless,filled,underlined` | `outlined` |
+| `[autoFocus]` | Auto focus | `boolean` | `false` |
 | `[placeholder]` | Placeholder | `string` | - |
 | `[showSearch]` | Whether support search | `bool` | `false` |
 | `[allowClear]` | Whether show clear button | `bool` | `true` |
@@ -6011,7 +6045,6 @@ Every select triggers a HTTP request, data source is from `asyncData`; includes 
 | `[columnClassName]` | Custom style of data column in popup menu | `string` | - |
 | `[notFoundContent]` | Content when dropdown list is empty | `string` | - |
 | `[data]` | Initial data, is used in first column data, sub column is loaded by `children` option, or loaded by `load` asynchronous event | `Array` | - |
-| `[enableCache]` | Whether cache asynchronous loaded data, should set it to false if data is changed in every asynchronous load | `bool` | `true` |
 | `[expandTrigger]` | How is sub menu expanded, options: 'click' or 'hover' | `string` | `click` |
 | `[changeOnSelect]` | When it is set to true, the value is changed when each level of menu option is selected, see details from above demo | `bool` | `false` |
 | `[changeOn]` | Custom function to determine if it should have a change when a menu option is selected, will have a change when return value is true | `(option: NzCascaderOption, level: number) => boolean` | - |
@@ -6019,7 +6052,8 @@ Every select triggers a HTTP request, data source is from `asyncData`; includes 
 | `[valueProperty]` | Property of `value` | `string` | `value` |
 | `[labelProperty]` | Property of `label` | `string` | `label` |
 | `[multiple]` | Support multiple | `boolean` | `false` |
-| `(visibleChange)` | Asynchronous load event | `(value: boolean) => void` | - |
+| `[suffixIcon]` | Custom select box suffix icon | `TemplateRef<any>, string` | - |
+| `(openChange)` | Dropdown menu open/close callback | `(status: boolean) => void` | - |
 | `(change)` | Selected value changed event | `(values: any[]) => void` | - |
 | `(selectionChange)` | Select option changed event | `(values: NzCascaderOption[]) => void` | - |
 | `(clear)` | Content clear event | `() => void` | - |
@@ -6139,6 +6173,32 @@ export const appConfig: ApplicationConfig = {
 ---
 
 ---
+title: chart-echarts
+subtitle: ECharts
+cols: 1
+type: ECharts
+module: import { ChartEChartsModule } from '@delon/chart/chart-echarts';
+---
+
+[ECharts](https://echarts.apache.org/en/index.html) is an open-source JavaScript visualization library. The ECharts script is lazy-loaded and works out of the box.
+
+## API
+
+### chart-echarts
+
+| Property | Description | Type | Default |
+|----------|-------------|------|---------|
+| `[width]` | Width of the chart | `number, string` | `100%` |
+| `[height]` | Height of the chart | `number, string` | `400px` |
+| `[option]` | [Options](https://echarts.apache.org/en/option.html#title) | `ChartEChartsOption` | - |
+| `[theme]` | [Theme](https://echarts.apache.org/en/theme-builder.html) configuration | `string, object` | - |
+| `[initOpt]` | [init](https://echarts.apache.org/en/api.html#echarts.init) options (such as `renderer`, `devicePixelRatio`); changing it recreates the instance | `object` | - |
+| `[on]` | Equivalent to the ECharts [on](https://echarts.apache.org/en/api.html#echartsInstance.on) | `ChartEChartsOn[]` | - |
+| `(events)` | Event callback | `output<ChartEChartsEvent>` | - |
+
+---
+
+---
 title: checkbox
 subtitle: Checkbox
 type: Widgets
@@ -6150,23 +6210,23 @@ Checkbox.
 
 ### schema
 
-Property        | Description                                 | Type                 | Default
-----------------|---------------------------------------------|----------------------|--------
-`[readOnly]`    | Whether to disable the state                | `boolean`            | -
-`[enum]`        | Render checkbox group when the value exists | `SFSchemaEnumType[]` | -
-`[title]`       | Text of the single checkbox                 | `string`             | -
-`[description]` | Help text of the single checkbox            | `string`             | -
+| Property        | Description                                 | Type                 | Default |
+| --------------- | ------------------------------------------- | -------------------- | ------- |
+| `[readOnly]`    | Whether to disable the state                | `boolean`            | -       |
+| `[enum]`        | Render checkbox group when the value exists | `SFSchemaEnumType[]` | -       |
+| `[title]`       | Text of the single checkbox                 | `string`             | -       |
+| `[description]` | Help text of the single checkbox            | `string`             | -       |
 
 ### ui
 
-Property | Description | Type | Default
--------- | ----------- | ---- | -------
-`[asyncData]` | Async data source, render checkbox group when the value exists  | `() => Observable<SFSchemaEnumType[]>` | -
-`[span]` | Raster number of cells to occupy | `number` | -
-`[styleType]` | Style of the `nz-checkbox` | `default, button` | `default`
-`[checkAll]` | Whether to select all  | `boolean` | -
-`[checkAllText]` | Select all button text  | `string` | `全选`
-`[change]` | Changed event, Parameter: single checkbox is `boolean`, otherwise `SFSchemaEnum[]` | `(res: boolean | SFSchemaEnum[]) => void` | -
+| Property         | Description                                                                        | Type                                       | Default   |
+| ---------------- | ---------------------------------------------------------------------------------- | ------------------------------------------ | --------- |
+| `[asyncData]`    | Async data source, render checkbox group when the value exists                     | `() => Observable<SFSchemaEnumType[]>`     | -         |
+| `[span]`         | Raster number of cells to occupy                                                   | `number`                                   | -         |
+| `[styleType]`    | Style of the `nz-checkbox`                                                         | `default, button`                          | `default` |
+| `[checkAll]`     | Whether to select all                                                              | `boolean`                                  | -         |
+| `[checkAllText]` | Select all button text                                                             | `string`                                   | `全选`    |
+| `[change]`       | Changed event, Parameter: single checkbox is `boolean`, otherwise `SFSchemaEnum[]` | `(res: boolean \| SFSchemaEnum[]) => void` | -         |
 
 ---
 
@@ -6191,11 +6251,14 @@ Non-built-in modules need to additionally register `withColorWidget` in [json-sc
 | `[format]`       | Format of color       | `rgb`｜`hex`｜`hsb`                 | `hex`     |
 | `[defaultValue]` | Default value of color     | `string`｜`NzColor`                  | `false`   |
 | `[allowClear]`   | Allow clearing color selected  | `boolean`                         | `false`   |
+| `[disabledAlpha]` | Disable alpha selector | `boolean` | `false` |
+| `[presets]`      | Preset color list | `NzPresetColor[]` | - |
 | `[trigger]`      | ColorPicker trigger mode | `hover`｜`click`                   | `click`   |
 | `[showText]`      | Show color text     | `boolean`                         | `false`   |
 | `[title]`      | Setting the title of the color picker | `TemplateRef<void>`｜`string`      | -         |
 | `(change)`     | Callback when value is changed    | `EventEmitter<{ color: NzColor; format: string }>`            | -         |
 | `(formatChange)`      | Callback when `format` is changed      | `EventEmitter<'rgb'｜'hex'｜'hsb'>` | -         |
+| `(onClear)`      | Callback when the clear button is clicked | `() => void` | - |
 | `[block]`   | Color Block  | `boolean`                         | `false`  |
 
 ---
@@ -6223,7 +6286,7 @@ The countdown component depends on [ngx-countdown](https://github.com/cipchk/ngx
 
 ## Dependencies
 
-```
+```bash
 npm i -S ngx-countdown
 ```
 
@@ -6357,6 +6420,8 @@ To select or input a date.
 | `[inline]` | Inline mode of the date picker | `boolean` | `false` |
 | `[separator]` | separator | `string, TemplateRef` | `'~'` |
 | `[showWeekNumber]` | whether to show the week number on each row (Only supported by date picker. Week picker always shows week numbers) | `boolean` | `false` |
+| `[ranges]` | Preset ranges for quick selection, only valid in `range` mode | `{ [key: string]: Date[] \| (() => Date[]) }` | - |
+| `[autoFocus]` | get focus when component mounted | `boolean` | `false` |
 | `[onOk]` | callback when click ok button | `(data: Date | Date[]) => void` | - |
 | `[change]` | Date change callback | `(data: Date | Date[]) => void` | - |
 
@@ -6425,7 +6490,10 @@ getTimeDistance('week')
 title: decorator
 subtitle: Decorator
 type: Tools
+deprecated: 24.0.0
 ---
+
+# Will be removed in v24.0.0.
 
 ## @ZoneOutside
 
@@ -7143,6 +7211,73 @@ There are three ways:
 ---
 
 ---
+title: g2-bar
+subtitle: Bar
+cols: 1
+type: G2
+module: import { G2BarModule } from '@delon/chart/bar';
+---
+
+Use vertical bars to compare values between categories. One axis represents the categorical dimension to compare, and the other represents the corresponding value.
+
+## API
+
+### g2-bar
+
+| Property | Description | Type | Default |
+|----------|-------------|------|---------|
+| `[repaint]` | Whether to repaint when the data changes again | `boolean` | `true` |
+| `[delay]` | Delayed rendering, unit: ms | `number` | `0` |
+| `[title]` | Title of the chart | `string,TemplateRef<void>` | - |
+| `[color]` | Color of the chart | `string` | `rgba(24, 144, 255, 0.85)` |
+| `[padding]` | Padding of the chart, `'auto'` means G2 calculates it automatically | `Array<number \| string> \| string` | `'auto'` |
+| `[height]` | Height of the chart | `number` | - |
+| `[data]` | Data | `G2BarData[]` | `[]` |
+| `[autoLabel]` | Automatically hide the x-axis label when the width is insufficient | `boolean` | `true` |
+| `[interaction]` | Interaction type: `none` (no interaction), `element-active` (active element), `active-region` (chart component), `brush` (brush selection), `drag-move` (drag to move) | `InteractionType` | `none` |
+| `[theme]` | Custom chart theme | `string \| LooseObject` | - |
+| `(clickItem)` | Callback when clicking an item | `output<G2BarClickItem>` | - |
+| `(ready)` | Callback when G2 is initialized | `output<Chart>` | - |
+| `(error)` | Callback when rendering fails (G2 not loaded or render throws); `(ready)` will not fire | `output<unknown>` | - |
+
+### G2BarData
+
+| Property | Description | Type | Default |
+|----------|-------------|------|---------|
+| `[x]` | x-axis | `any` | - |
+| `[y]` | y-axis | `any` | - |
+| `[color]` | Color of the axis | `string` | - |
+
+---
+
+---
+title: g2-card
+subtitle: Chart Card
+cols: 2
+type: G2
+module: import { G2CardModule } from '@delon/chart/card';
+---
+
+Chart card, a card container for charts, which can be easily combined with other chart suites to display rich information.
+
+## API
+
+### g2-card
+
+| Property | Description | Type | Default |
+|----------|-------------|------|---------|
+| `[title]` | Title of the card | `string,TemplateRef<void>` | - |
+| `[avatar]` | Avatar | `string,TemplateRef<void>` | - |
+| `[action]` | Action of the card | `string,TemplateRef<void>` | - |
+| `[total]` | Total amount of the data (HTML supported) | `string` | - |
+| `[footer]` | Footer of the card | `string,TemplateRef<void>` | - |
+| `[contentHeight]` | Height of the content area (unit: `px`) | `string` | - |
+| `[bordered]` | Whether to display the border | `boolean` | `false` |
+| `[loading]` | Whether to display the loading state (`nz-spin` wraps the content) | `boolean` | `false` |
+
+---
+
+---
 title: g2-chart
 subtitle: Custom Chart
 cols: 1
@@ -7178,8 +7313,8 @@ If throw error `G2` not found, please refer to [Frequently Asked Questions](/cha
 
 ## Links
 
-- [G2 Document](https://www.yuque.com/antv/g2-docs-en)
-- [G2 Demo](https://antv.alipay.com/zh-cn/g2/3.x/demo/index.html)
+- [G2 Documents](https://g2.antv.antgroup.com/en/)
+- [G2 Examples](https://g2.antv.antgroup.com/examples)
 
 ## API
 
@@ -7187,13 +7322,409 @@ If throw error `G2` not found, please refer to [Frequently Asked Questions](/cha
 
 | Property | Description | Type | Default |
 |----------|-------------|------|---------|
+| `[repaint]` | Whether to repaint when the data changes again | `boolean` | `true` |
 | `[delay]` | Delayed rendering, unit: ms | `number` | `0` |
 | `[height]` | Height of chart container | `number` | - |
-| `[resizeTime]` | Resize event debounce time | `number` | `200` |
-| `(render)` | Render event | `EventEmitter<ElementRef>` | - |
-| `(resize)` | Resize event | `EventEmitter<ElementRef>` | - |
-| `(destroy)` | Destroy event | `EventEmitter<ElementRef>` | - |
-| `[theme]` | Custom chart theme | `string | LooseObject` | - |
+| `[resizeTime]` | Resize event debounce time (`0` disables the resize listener) | `number` | `0` |
+| `(render)` | Render event | `output<ElementRef>` | - |
+| `(resize)` | Resize event | `output<ElementRef>` | - |
+| `(destroy)` | Destroy event (**not emitted in the current version, kept for compatibility**) | `output<ElementRef>` | - |
+| `(ready)` | Callback when G2 is initialized | `output<Chart>` | - |
+| `(error)` | Callback when rendering fails (G2 not loaded or render throws); `(ready)` will not fire | `output<unknown>` | - |
+| `[theme]` | Custom chart theme | `string \| LooseObject` | - |
+
+---
+
+---
+title: g2-gauge
+subtitle: Gauge
+cols: 1
+type: G2
+module: import { G2GaugeModule } from '@delon/chart/gauge';
+---
+
+A way to display progress, which shows the current progress more intuitively and can also represent a percentage.
+
+## API
+
+### g2-gauge
+
+| Property | Description | Type | Default |
+|----------|-------------|------|---------|
+| `[repaint]` | Whether to repaint when the data changes again | `boolean` | `true` |
+| `[delay]` | Delayed rendering, unit: ms | `number` | `0` |
+| `[title]` | Title of the chart | `string` | - |
+| `[height]` | Height of the chart | `number` | - |
+| `[width]` | Width of the chart | `number` | - |
+| `[color]` | Color of the chart | `string` | `#2F9CFF` |
+| `[bgColor]` | Background color of the chart | `string` | `#F0F2F5` |
+| `[percent]` | Percentage | `number` | - |
+| `[fontSize]` | Base font size of the chart (the center value scales with `1.4em`) | `number` | `14` |
+| `[padding]` | Padding | `Array<number \| string>` | `16` |
+| `[format]` | Formatter of the axis label | `(text: string, item: {}, index: number) => string` | - |
+| `[theme]` | Custom chart theme | `string \| LooseObject` | - |
+| `(ready)` | Callback when G2 is initialized | `output<Chart>` | - |
+| `(error)` | Callback when rendering fails (G2 not loaded or render throws); `(ready)` will not fire | `output<unknown>` | - |
+
+---
+
+---
+title: g2-mini-area
+subtitle: Mini Area
+cols: 2
+type: G2
+module: import { G2MiniAreaModule } from '@delon/chart/mini-area';
+---
+
+An area chart is also called an area graph. It is built on top of a line chart: the area between the line and the axis is filled with a color or texture, and this filled area is called an area. The color fill highlights the trend information better.
+
+## API
+
+### g2-mini-area
+
+| Property | Description | Type | Default |
+|----------|-------------|------|---------|
+| `[repaint]` | Whether to repaint when the data changes again | `boolean` | `true` |
+| `[delay]` | Delayed rendering, unit: ms | `number` | `0` |
+| `[color]` | Color of the chart | `string` | `rgba(24, 144, 255, 0.2)` |
+| `[borderColor]` | Border color of the chart | `string` | `#1890FF` |
+| `[borderWidth]` | Border width of the chart | `number` | `2` |
+| `[fit]` | Whether to fit the container size (`autoFit`) | `boolean` | `true` |
+| `[height]` | Height of the chart | `number` | `56` |
+| `[line]` | Whether to display the line | `boolean` | `false` |
+| `[animate]` | Whether to display the animation | `boolean` | `true` |
+| `[padding]` | Padding of the chart | `array` | `[8, 8, 8, 8]` |
+| `[xAxis]` | x-axis options (passed to the v5 `AxisComponent`) | `object` | - |
+| `[yAxis]` | y-axis options (passed to the v5 `AxisComponent`) | `object` | - |
+| `[yTooltipSuffix]` | Suffix of the y-axis tooltip, usually used to specify the unit | `string` | - |
+| `[tooltipType]` | Tooltip type | `'mini','default'` | `'default'` |
+| `[data]` | Data | `G2MiniAreaData[]` | - |
+| `[theme]` | Custom chart theme | `string \| LooseObject` | - |
+| `(clickItem)` | Callback when clicking an item | `output<G2MiniAreaClickItem>` | - |
+| `(ready)` | Callback when G2 is initialized | `output<Chart>` | - |
+| `(error)` | Callback when rendering fails (G2 not loaded or render throws); `(ready)` will not fire | `output<unknown>` | - |
+
+### G2MiniAreaData
+
+| Property | Description | Type | Default |
+|----------|-------------|------|---------|
+| `[x]` | x-axis | `any` | - |
+| `[y]` | y-axis | `any` | - |
+
+---
+
+---
+title: g2-mini-bar
+subtitle: Mini Bar
+cols: 2
+type: G2
+module: import { G2MiniBarModule } from '@delon/chart/mini-bar';
+---
+
+A mini bar chart is better for displaying simple interval data; its concise presentation greatly reduces the visual pressure of large amounts of data.
+
+## API
+
+### g2-mini-bar
+
+| Property | Description | Type | Default |
+|----------|-------------|------|---------|
+| `[repaint]` | Whether to repaint when the data changes again | `boolean` | `true` |
+| `[delay]` | Delayed rendering, unit: ms | `number` | `0` |
+| `[color]` | Color of the chart | `string` | `#1890FF` |
+| `[height]` | Height of the chart | `number` | - |
+| `[yTooltipSuffix]` | Suffix of the y-axis tooltip, usually used to specify the unit | `string` | - |
+| `[tooltipType]` | Tooltip type | `'mini','default'` | `'default'` |
+| `[borderWidth]` | Line width | `number` | `5` |
+| `[padding]` | Padding of the chart | `array` | `[8, 8, 8, 8]` |
+| `[data]` | Data | `G2MiniBarData[]` | - |
+| `[theme]` | Custom chart theme | `string \| LooseObject` | - |
+| `(clickItem)` | Callback when clicking an item | `output<G2MiniBarClickItem>` | - |
+| `(ready)` | Callback when G2 is initialized | `output<Chart>` | - |
+| `(error)` | Callback when rendering fails (G2 not loaded or render throws); `(ready)` will not fire | `output<unknown>` | - |
+
+### G2MiniBarData
+
+| Property | Description | Type | Default |
+|----------|-------------|------|---------|
+| `[x]` | x-axis | `any` | - |
+| `[y]` | y-axis | `any` | - |
+| `[color]` | Color of the axis | `string` | - |
+
+---
+
+---
+title: g2-mini-progress
+subtitle: Mini Progress
+cols: 1
+type: G2
+module: import { G2MiniProgressModule } from '@delon/chart/mini-progress';
+---
+
+It is ideal for displaying speed-related graphics.
+
+## API
+
+### g2-mini-progress
+
+| Property | Description | Type | Default |
+|----------|-------------|------|---------|
+| `[target]` | Target percentage | `number` | - |
+| `[color]` | Color of the progress bar | `string` | - |
+| `[strokeWidth]` | Height of the progress bar | `number` | - |
+| `[percent]` | Percentage | `number` | - |
+
+---
+
+---
+title: g2-pie
+subtitle: Pie
+cols: 1
+type: G2
+module: import { G2PieModule } from '@delon/chart/pie';
+---
+
+It is ideal for displaying speed-related graphics.
+
+## API
+
+### g2-pie
+
+| Property | Description | Type | Default |
+|----------|-------------|------|---------|
+| `[repaint]` | Whether to repaint when the data changes again | `boolean` | `true` |
+| `[delay]` | Delayed rendering, unit: ms | `number` | `0` |
+| `[animate]` | Whether to display the animation | `boolean` | `true` |
+| `[color]` | Color of the chart | `string` | `rgba(24, 144, 255, 0.85)` |
+| `[height]` | Height of the chart | `number` | - |
+| `[fontSize]` | Base font size (the legend inherits it and the center value scales with `em`) | `number` | `14` |
+| `[hasLegend]` | Whether to display the legend | `boolean` | `false` |
+| `[padding]` | Padding of the chart | `number[]` | `[12, 0, 12, 0]` |
+| `[percent]` | Percentage | `number` | - |
+| `[select]` | Whether slice selection is supported (**not implemented in the current version, kept for compatibility and has no effect**) | `boolean` | `true` |
+| `[lineWidth]` | Border width | `number` | `0` |
+| `[inner]` | Radius of the inner polar coordinate | `number` | `0.75` |
+| `[blockMaxWidth]` | Width at which the layout switches to block mode | `number` | `380` |
+| `[tooltip]` | Whether to display the tooltip | `boolean` | `true` |
+| `[subTitle]` | Subtitle of the chart | `string,TemplateRef<void>` | - |
+| `[total]` | Total amount | `string,number,TemplateRef<void>` | - |
+| `[valueFormat]` | Formatter for the y-axis value | `(y: number) => string` | - |
+| `[data]` | Data | `G2PieData[]` | - |
+| `[colors]` | Color list | `string[]` | - |
+| `[interaction]` | Interaction type: `none` (no interaction), `element-active` (active element), `active-region` (chart component), `brush` (brush selection), `drag-move` (drag to move) | `InteractionType` | `none` |
+| `[ratio]` | Percentage configuration | `G2PieRatio` | `{ text: '占比', inverse: '反比', color: '', inverseColor: '#F0F2F5' }` |
+| `[theme]` | Custom chart theme | `string \| LooseObject` | - |
+| `(clickItem)` | Callback when clicking an item | `output<G2PieClickItem>` | - |
+| `(ready)` | Callback when G2 is initialized | `output<Chart>` | - |
+| `(error)` | Callback when rendering fails (G2 not loaded or render throws); `(ready)` will not fire | `output<unknown>` | - |
+
+### G2PieData
+
+| Property | Description | Type | Default |
+|----------|-------------|------|---------|
+| `[x]` | x-axis | `any` | - |
+| `[y]` | y-axis | `number` | - |
+
+---
+
+---
+title: g2-radar
+subtitle: Radar
+cols: 1
+type: G2
+module: import { G2RadarModule } from '@delon/chart/radar';
+---
+
+A radar chart is a graphical method of displaying multivariate data in the form of a two-dimensional chart of three or more quantitative variables represented on axes starting from the same point. The relative position and angle of the axes are usually uninformative.
+
+## API
+
+### g2-radar
+
+| Property | Description | Type | Default |
+|----------|-------------|------|---------|
+| `[repaint]` | Whether to repaint when the data changes again | `boolean` | `true` |
+| `[delay]` | Delayed rendering, unit: ms | `number` | `0` |
+| `[title]` | Title of the chart | `string,TemplateRef<void>` | - |
+| `[height]` | Height of the chart | `number` | - |
+| `[hasLegend]` | Whether to display the legend | `boolean` | `true` |
+| `[padding]` | Padding of the chart | `array` | `[44, 30, 16, 30]` |
+| `[tickCount]` | Number of y-axis ticks | `number` | `4` |
+| `[colors]` | Color list | `string[]` | `['#1890FF', '#FACC14', '#2FC25B', '#8543E0', '#F04864', '#13C2C2', '#fa8c16', '#a0d911']` |
+| `[data]` | Data | `G2RadarData[]` | - |
+| `[theme]` | Custom chart theme | `string \| LooseObject` | - |
+| `(clickItem)` | Callback when clicking an item | `output<G2RadarClickItem>` | - |
+| `(ready)` | Callback when G2 is initialized | `output<Chart>` | - |
+| `(error)` | Callback when rendering fails (G2 not loaded or render throws); `(ready)` will not fire | `output<unknown>` | - |
+
+### G2RadarData
+
+| Property | Description | Type | Default |
+|----------|-------------|------|---------|
+| `[name]` | Name | `string` | - |
+| `[label]` | Label | `string` | - |
+| `[value]` | Value | `number` | - |
+
+---
+
+---
+title: g2-single-bar
+subtitle: Single Bar
+cols: 1
+type: G2
+module: import { G2SingleBarModule } from '@delon/chart/single-bar';
+---
+
+A single bar chart is better for displaying simple interval data in a list; its concise presentation greatly reduces the visual pressure of large amounts of data.
+
+## API
+
+### g2-single-bar
+
+| Property | Description | Type | Default |
+|----------|-------------|------|---------|
+| `[repaint]` | Whether to repaint when the data changes again | `boolean` | `true` |
+| `[delay]` | Delayed rendering, unit: ms | `number` | `0` |
+| `[plusColor]` | Color of the chart | `string` | `#40a9ff` |
+| `[minusColor]` | Color of the chart for negative values | `string` | `#ff4d4f` |
+| `[height]` | Height of the chart | `number` | `60` |
+| `[barSize]` | Height of the bar | `number` | `30` |
+| `[min]` | Minimum value | `number` | `0` |
+| `[max]` | Maximum value; a value less than 0 means negative values are displayed | `number` | `100` |
+| `[padding]` | Padding of the chart | `any` | `0` |
+| `[line]` | Whether to display the middle line (the horizontal line at `(min + max) / 2`) | `boolean` | `false` |
+| `[value]` | Value | `number` | `0` |
+| `[format]` | Formatter of the displayed value | `(value: number) => string` | - |
+| `[textStyle]` | Style of the displayed value | `any` | `{ fontSize: 12, color: '#595959' }` |
+| `[theme]` | Custom chart theme | `string \| LooseObject` | - |
+| `(ready)` | Callback when G2 is initialized | `output<Chart>` | - |
+| `(error)` | Callback when rendering fails (G2 not loaded or render throws); `(ready)` will not fire | `output<unknown>` | - |
+
+---
+
+---
+title: g2-tag-cloud
+subtitle: Tag Cloud
+cols: 1
+type: G2
+module: import { G2TagCloudModule } from '@delon/chart/tag-cloud';
+---
+
+A tag cloud is a way to display a set of related tags and their corresponding weights. A typical tag cloud contains 30 to 150 tags, and the weight affects the font size or other visual effects.
+
+## API
+
+### g2-tag-cloud
+
+| Property | Description | Type | Default |
+|----------|-------------|------|---------|
+| `[repaint]` | Whether to repaint when the data changes again | `boolean` | `true` |
+| `[delay]` | Delayed rendering, unit: ms | `number` | `0` |
+| `[height]` | Height | `number` | `200` |
+| `[width]` | Width, automatically detected from the host element if not specified | `number` | `0` |
+| `[padding]` | Padding of the chart | `number \| number[] \| 'auto'` | `0` |
+| `[data]` | Data | `G2TagCloudData[]` | `[]` |
+| `[theme]` | Custom chart theme | `string \| LooseObject` | - |
+| `(clickItem)` | Callback when clicking an item | `output<G2TagCloudClickItem>` | - |
+| `(ready)` | Callback when G2 is initialized | `output<Chart>` | - |
+| `(error)` | Callback when rendering fails (G2 not loaded or render throws); `(ready)` will not fire | `output<unknown>` | - |
+
+### G2TagCloudData
+
+| Property | Description | Type | Default |
+|----------|-------------|------|---------|
+| `[name]` | Name | `string` | - |
+| `[value]` | Value | `number` | - |
+
+---
+
+---
+title: g2-timeline
+subtitle: Timeline
+cols: 1
+type: G2
+module: import { G2TimelineModule } from '@delon/chart/timeline';
+---
+
+The `timeline` component renders a bar chart with a time axis, where `x` points to the time value. By default it displays up to two indicators at the same time, `y1` and `y2`.
+
+## API
+
+### g2-timeline
+
+| Property | Description | Type | Default |
+|----------|-------------|------|---------|
+| `[repaint]` | Whether to repaint when the data changes again | `boolean` | `true` |
+| `[delay]` | Delayed rendering, unit: ms | `number` | `0` |
+| `[title]` | Title of the chart | `string,TemplateRef<void>` | - |
+| `[maxAxis]` | Maximum number of indicators | `number` | `2` |
+| `[data]` | Data; note that the indicator data passed depends on `maxAxis` | `G2TimelineData[]` | - |
+| `[titleMap]` | Alias of the indicator | `G2TimelineMap` | - |
+| `[colorMap]` | Color of the indicator | `G2TimelineMap` | `{ y1: '#5B8FF9', y2: '#5AD8A6', y3: '#5D7092', y4: '#F6BD16', y5: '#E86452' }` |
+| `[height]` | Height | `number` | `450` |
+| `[padding]` | Padding of the chart | `number[]` | `[40, 8, 64, 40]` |
+| `[borderWidth]` | Line width | `number` | `2` |
+| `[mask]` | Date format, using the [G2 mask date format](https://g2.antv.vision/zh/docs/manual/tutorial/scale#time) | `string` | `HH:mm` |
+| `[maskSlider]` | Slider date format, using the [date-fns date format](https://www.unicode.org/reports/tr35/tr35-dates.html#Date_Field_Symbol_Table) | `string` | `HH:mm` |
+| `[position]` | Position of the title | `'top','right','bottom','left'` | `'top'` |
+| `[slider]` | Whether the slider is required | `boolean` | `true` |
+| `[theme]` | Custom chart theme | `string \| LooseObject` | - |
+| `(clickItem)` | Callback when clicking an item | `output<G2TimelineClickItem>` | - |
+| `(ready)` | Callback when G2 is initialized | `output<Chart>` | - |
+| `(error)` | Callback when rendering fails (G2 not loaded or render throws); `(ready)` will not fire | `output<unknown>` | - |
+
+### G2TimelineData
+
+| Property | Description | Type | Default |
+|----------|-------------|------|---------|
+| `[time]` | Date format | `Date \| number` | - |
+| `[y1]` | Data of indicator 1 | `number` | - |
+| `[y2]` | Data of indicator 2 | `number` | - |
+| `[y3]` | Data of indicator 3 | `number` | - |
+| `[y4]` | Data of indicator 4 | `number` | - |
+| `[y5]` | Data of indicator 5 | `number` | - |
+
+### G2TimelineMap
+
+| Property | Description | Type | Default |
+|----------|-------------|------|---------|
+| `[y1]` | Indicator 1 | `string` | - |
+| `[y2]` | Indicator 2 | `string` | - |
+| `[y3]` | Indicator 3 | `string` | - |
+| `[y4]` | Indicator 4 | `string` | - |
+| `[y5]` | Indicator 5 | `string` | - |
+
+---
+
+---
+title: g2-water-wave
+subtitle: Water Wave
+cols: 1
+type: G2
+module: import { G2WaterWaveModule } from '@delon/chart/water-wave';
+---
+
+A water wave chart is a way to display a proportion, which shows the percentage of a key value more intuitively. It is rendered with the G2 v5 [`liquid`](https://g2.antv.antgroup.com/examples/general/Liquid) mark.
+
+> Sizing is handled by the v5 `autoFit`; when the container is narrower than `[size]`, pass a smaller `[size]` instead. Use the public `render()` method to repaint manually.
+
+## API
+
+### g2-water-wave
+
+| Property | Description | Type | Default |
+|----------|-------------|------|---------|
+| `[repaint]` | Whether to repaint when the data changes again | `boolean` | `true` |
+| `[delay]` | Delayed rendering, unit: ms | `number` | `0` |
+| `[animate]` | Whether to display the enter animation (the wave motion itself is built into G2 and always runs) | `boolean` | `true` |
+| `[title]` | Title of the chart | `string,TemplateRef<void>` | - |
+| `[size]` | Size of the chart (the side length of the square) | `number` | `160` |
+| `[color]` | Color of the chart (the wave and the ring share it) | `string` | `#1890FF` |
+| `[percent]` | Percentage, from `0` to `100` | `number` | - |
+| `[padding]` | Padding of the chart | `number \| number[] \| 'auto'` | `8` |
+| `[theme]` | Custom chart theme | `string \| LooseObject` | - |
+| `(ready)` | Callback when G2 is initialized | `output<Chart>` | - |
+| `(error)` | Callback when rendering fails (G2 not loaded or render throws); `(ready)` will not fire | `output<unknown>` | - |
 
 ---
 
@@ -7298,7 +7829,7 @@ const data = { 1: 'Normal', 2: 'Deleted' };
 
 If you want to keep the key name `number` numeric:
 
-```
+```ts
 @for (item of data | keys: true; track $index) {
   <div >{{item.key}} {{item.value | json}}</div>
 }
@@ -7560,13 +8091,16 @@ Every select triggers a HTTP request, data source is from `asyncData`.
 |----------|-------------|------|---------|
 | `[asyncData]` | Asynchronous static data source | `(input: string) => Observable<SFSchemaEnumType[]>` | - |
 | `[size]` | Size, equals to `nzSize` | `string` | - |
+| `[variant]` | Variant | `outlined,borderless,filled,underlined` | `outlined` |
 | `[placeholder]` | Placeholder | `string` | - |
+| `[allowClear]` | Whether show clear button | `boolean` | `false` |
 | `[loadData]` | Realtime data | `(option: MentionOnSearchTypes) => Observable<SFSchemaEnumType[]>` | - |
 | `[notFoundContent]` | Content when nothing found | `string` | `无匹配结果，轻敲空格完成输入` |
-| `[placement]` | Position of suggestion box | `button,top` | `button` |
+| `[placement]` | Position of suggestion box | `bottom,top` | `bottom` |
 | `[prefix]` | Character to trigger to popup dropdown list | `'string'` `'string[]'` | `@` |
 | `[valueWith]` | Function that maps a suggestion value | `(value: any) => string` | - |
 | `[select]` | Callback when option in dropdown list is selected | `(value: any) => void` | - |
+| `(onClear)` | Callback when content is cleared | `() => void` | - |
 | `[inputStyle]` | Input type | `text, textarea` | `text` |
 | `[autosize]` | Adaptive content height, can be set object:`{ minRows: 2, maxRows: 6 }` | `{ minRows?: number; maxRows?: number }` | `{ minRows: 1, maxRows: 0 }` |
 
@@ -7861,6 +8395,10 @@ Enter a number within certain range with the mouse or keyboard.
 
 | Property | Description | Type | Default |
 |----------|-------------|------|---------|
+| `[variant]` | Variant | `outlined,borderless,filled,underlined` | `outlined` |
+| `[addOnBefore]` | Set the pre label | `string` | - |
+| `[addOnAfter]` | Set the post label | `string` | - |
+| `[autofocus]` | Auto focus | `boolean` | `false` |
 | `[prefix]` | Prefix, simplifying the use of `nzFormatter`, `nzParser` | - | - |
 | `[unit]` | Unit, simplifying the use of `nzFormatter`, `nzParser` | - | - |
 | `[formatter]` | Specifies the format of the value presented | - | - |
@@ -7868,6 +8406,9 @@ Enter a number within certain range with the mouse or keyboard.
 | `[precision]` | precision of input value | - | - |
 | `[widgetWidth]` | Specify `nz-number` width | `number, string` | `90` |
 | `[hideStep]` | Hide step icon | `boolean` | `false` |
+| `[changeOnWheel]` | Change on mouse wheel | `boolean` | `true` |
+| `(focus)` | Callback when getting focus | `() => void` | - |
+| `(blur)` | Callback when losing focus | `() => void` | - |
 
 ## QA
 
@@ -8288,8 +8829,10 @@ Non-built-in modules need to additionally register `withQrCodeWidget` in [json-s
 | `[icon]`            | Icon address in QR code             | `string`                        | -         |
 | `[iconSize]`        | The size of the icon in the QR code | `number`                        | `40`      |
 | `[bordered]`        | Whether has border style            | `boolean`                       | `true`    |
-| `[status]`          | QR code status                      | `'active'｜'expired' ｜'loading'` | `active`  |
+| `[type]`            | Rendering type                      | `canvas,svg`                     | `canvas`  |
+| `[status]`          | QR code status                      | `'active'｜'expired' ｜'loading' ｜'scanned'` | `active`  |
 | `[level]`           | Error Code Level                    | `'L'｜'M'｜'Q'｜'H'`               | `M`       |
+| `[boostLevel]`      | Automatically raises the error correction level | `boolean`             | `true`    |
 | `(refresh)`         | callback                            | `EventEmitter<string>`          | -         |
 
 ---
@@ -8411,8 +8954,10 @@ Non-built-in modules need to additionally register `withRateWidget` in [json-sch
 |----------|-------------|------|---------|
 | `[allowClear]` | whether to allow clear when click again | `boolean` | `true` |
 | `[autoFocus]` | get focus when component mounted | `boolean` | `false` |
+| `[character]` | Custom character | `TemplateRef<{ $implicit: number }>` | - |
 | `[text]` | Reminder text template, `{{value}}` indicates the current value | `string` | - |
 | `[tooltips]` | Customize tooltip by each character | `string[]` | `[]` |
+| `(hoverChange)` | Callback when the value changes under the cursor | `(value: number) => void` | - |
 
 ---
 
@@ -8506,14 +9051,14 @@ Press the ([Menu](/theme/menu#Menu)) to configure.
 
 Reusable:
 
-```
-{ text:'Dashboard' }
+```ts
+{ text:'Dashboard' },
 { text:'Dashboard', reuse: true }
 ```
 
 Not reusable:
 
-```
+```ts
 { text:'Dashboard', reuse: false }
 ```
 
@@ -8523,14 +9068,14 @@ Press the ([Menu](/theme/menu#Menu)) to force the configure.
 
 Reusable:
 
-```
+```ts
 { text:'Dashboard', reuse: true }
 ```
 
 Not reusable:
 
-```
-{ text:'Dashboard' }
+```ts
+{ text:'Dashboard' },
 { text:'Dashboard', reuse: false }
 ```
 
@@ -8919,6 +9464,8 @@ Non-built-in modules need to additionally register `withSegmentedWidget` in [jso
 | Property | Description | Type | Default |
 |----------|-------------|------|---------|
 | `[block]` | Option to fit width to its parent\'s width | `boolean` | false |  |
+| `[vertical]` | Whether to enable vertical mode | `boolean` | `false` |  |
+| `[shape]` | Shape of the segmented | `default,round` | `default` |  |
 | `[asyncData]` |  Set children optional | `() => Observable<NzSegmentedOptions>` | - |  |
 | `(valueChange)` | Emits when index of the currently selected option changes | `(data: { index: number; item: SFValue }) => void` | - |  |
 
@@ -9125,10 +9672,14 @@ Property | Description | Type | Default
 Property | Description | Type | Default
 -------- | ----------- | ---- | -------
 `[range]` | dual thumb mode | `Boolean` | -
+`[step]` | The granularity the slider can step through values; when `marks` is not null, `null` means only the marks are selectable; default to `multipleOf` | `number, null` | `multipleOf` |
 `[marks]` | Tick mark of Slider, type of key must be `number`, and must in closed interval `[min, max]` ，each mark can declare its own style. | `NzMarks` | -
 `[dots]` | Whether the thumb can drag over tick only | `Boolean` | `false`
 `[included]` | Make effect when `marks` not null，`true` means containment and `false` means coordinative | `Boolean` | `true`
 `[vertical]` | If true, the slider will be vertical | `boolean` | `false`
+`[reverse]` | Reverse axis coordinate | `boolean` | `false`
+`[tooltipVisible]` | When always show tooltip with value `always`, never show with `never` | `default,always,never` | `default`
+`[tooltipPlacement]` | Set default placement of Tooltip | `string` | -
 `[afterChange]` | Fire when `onmouseup` is fired. | `(value: NzSliderValue) => void` | -
 `[formatter]` | Slider will pass its value to `nzTipFormatter`, and display its value in Tooltip, and hide Tooltip when return value is null | `(value: number) => string` | -
 
@@ -9668,6 +10219,7 @@ Default widget, A basic widget for getting the user input is a text field.
 | `[type]` | type of the input, e.g: `password` | `string` | - |
 | `[placeholder]` | placeholder of the input | `string` | - |
 | `[variant]` | Variant | `outlined,borderless,filled,underlined` | `outlined` |
+| `[allowClear]` | Allow clicking the clear icon to delete the content | `boolean` | `false` |
 | `[autocomplete]` | autocomplete of the input | `HTML Attribute` | - |
 | `[autofocus]` | autofocus of the input | `HTML Attribute` | - |
 | `[addOnBefore]` | The label text displayed before (on the left side of) the input field. | `string` | - |
@@ -9848,6 +10400,7 @@ Textarea.
 | `[placeholder]` | placeholder of the input | `string` | - |
 | `[autosize]` | height autosize feature, can be set object `{ minRows: 2, maxRows: 6 }` | `{ minRows?: number; maxRows?: number }` | `{ minRows: 1, maxRows: 0 }` |
 | `[variant]` | Variant | `outlined,borderless,filled,underlined` | `outlined` |
+| `[allowClear]` | Allow clicking the clear icon to delete the content; mutually exclusive with `maxCharacterCount` (`maxCharacterCount` takes precedence when both are set) | `boolean` | `false` |
 | `[maxCharacterCount]` | `textarea` maximum character count displayed | `number` | - |
 | `[computeCharacterCount]` | customized `characterCount` computation function | `(v: string) => number` | `v => v.length` |
 | `[change]` | The content event for the Input. | `(val: string) => void` | - |
@@ -10066,6 +10619,7 @@ Non-built-in modules need to additionally register `withTransferWidget` in [json
 | `[notFoundContent]` | Text to display when a column is empty | `string` | - |
 | `[canMove]` | Second verification when transfer choice box | `function` | - |
 | `[oneWay]` | Display as single direction | `boolean` | `false` |
+| `[showSelectAll]` | Whether show select all checkbox at bottom | `boolean` | `true` |
 | `(change)` | Callback function when the transfer between columns is complete | `(options: TransferChange) => void` | - |
 | `(searchChange)` | Callback function when search field is changed | `(options: TransferSearchChange) => void` | - |
 | `(selectChange)` | Callback function when selected items are changed | `(options: TransferSelectChange) => void` | - |
@@ -10103,7 +10657,10 @@ Non-built-in modules need to additionally register `withTreeSelectWidget` in [js
 |----------|-------------|------|---------|
 | `[asyncData]` | Asynchronous data source | `() => Observable<SFSchemaEnumType[]>` | - |
 | `[size]` | Size, equals to `nzSize` | `string` | `default` |
+| `[variant]` | Variant | `outlined,borderless,filled,underlined` | `outlined` |
 | `[placeholder]` | Placeholder | `string` | - |
+| `[showSearch]` | Support search | `boolean` | `false` |
+| `[placement]` | Dropdown placement | `bottomLeft,bottomRight,topLeft,topRight` | `bottomLeft` |
 | `[notFoundContent]` | Text to display when a column is empty | `string` | - |
 | `[allowClear]` | Whether show clear button | `boolean` | `false` |
 | `[clearValue]` | Default value when cleared | `any` | `undefined` |
@@ -10124,12 +10681,36 @@ Non-built-in modules need to additionally register `withTreeSelectWidget` in [js
 | `[maxTagPlaceholder]` | Placeholder for not showing tags | `TemplateRef<{ $implicit: NzTreeNode[] }>` | - |
 | `[treeTemplate]` | Custom Nodes | `TemplateRef<{ $implicit: NzTreeNode; origin: NzTreeNodeOptions }>` | - |
 | `[expandChange]` | Callback function for when a treeNode is expanded or collapsed | `(e: NzFormatEmitEvent) => Observable<SFSchemaEnum[]>` | - |
+| `[openChange]` | Dropdown menu open/close callback | `(status: boolean) => void` | - |
+| `[suffixIcon]` | Custom select box suffix icon | `TemplateRef<any>, string` | - |
 | `[virtualHeight]` | The height of virtual scroll | `string` | `-` |
 | `[virtualItemSize]` | The size of the items in the list, same as [cdk itemSize](https://material.angular.io/cdk/scrolling/api) | `number` | `28` |
 | `[virtualMaxBufferPx]` | The number of pixels worth of buffer to render for when rendering new items, same as [cdk maxBufferPx](https://material.angular.io/cdk/scrolling/api) | `number` | `500` |
 | `[virtualMinBufferPx]` | The minimum amount of buffer rendered beyond the viewport (in pixels),same as [cdk minBufferPx](https://material.angular.io/cdk/scrolling/api) | `number` | `28` |
 
 > Asynchronous data must set initial data (Using either `enum` or `asyncData`), otherwise, `expandChange` cannot be triggered.
+
+---
+
+---
+type: G2
+title: trend
+subtitle: Trend
+cols: 1
+module: import { TrendModule } from '@delon/chart/trend';
+---
+
+Trend symbols mark rising and falling trends. Green usually means "good" and red means "bad", except in stock market scenarios.
+
+## API
+
+### trend
+
+| Property | Description | Type | Default |
+|----------|-------------|------|---------|
+| `[colorful]` | Whether to use colorful marks | `boolean` | `true` |
+| `[flag]` | Rising or falling flag | `'up','down'` | - |
+| `[reverseColor]` | Whether to reverse the color | `boolean` | `false` |
 
 ---
 
@@ -10149,7 +10730,7 @@ Non-built-in modules need to additionally register `withUploadWidget` in [json-s
 
 - **Must** set `resReName` to get correct data
 - `multiple` determine return array or one element
-- If `enum` or `asyncData` is set, it will be converted to `fileList` (`nzFileList`), and **must** initially guarantee a `response` property to indicate remote data and make sure `resReName` can be obtained correctly
+- Use `fileList` to provide initial files; `enum` and `asyncData` act only as generic data sources, and their shape (`{ label, value }`) does not match the file object (`NzUploadFile`), so they are not applied as initial files
 - Image preview: by default, it uses `nzModal` to show `url` or `thumbUrl` of file object
 
 ## API
@@ -10173,6 +10754,7 @@ Non-built-in modules need to additionally register `withUploadWidget` in [json-s
 | `[action]` | Required attribute, upload URL | `string, ((file: UploadFile) => string, Observable<string>)` | - |
 | `[accept]` | File types that can be accepted, see details from [input accept Attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#attr-accept) | `string, string[]` | - |
 | `[limit]` | limit number of single upload when `multiple` is set, 0 means unlimited | `number` | `0` |
+| `[maxCount]` | Limit the number of uploaded files; when set to `1`, the latest uploaded file always replaces the current file | `number` | - |
 | `[filter]` | Custom filter when choosed file | `UploadFilter[]` | - |
 | `[fileList]` | File list | `UploadFile[]` | - |
 | `[fileSize]` | Limit file size, unit: KB; `0` means unlimited | `number` | `0` |

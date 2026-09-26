@@ -23,8 +23,10 @@ type: Non-built-in widgets
 | `[icon]`     | 二维码中 icon 地址 | `string`                          | -         |
 | `[iconSize]` | 二维码中 icon 大小 | `number`                          | `40`      |
 | `[bordered]` | 是否有边框        | `boolean`                         | `true`    |
-| `[status]`   | 二维码状态        | `'active'｜'expired' ｜'loading'`   | `active`  |
+| `[type]`     | 渲染类型          | `canvas,svg`                      | `canvas`  |
+| `[status]`   | 二维码状态        | `'active'｜'expired' ｜'loading' ｜'scanned'` | `active`  |
 | `[level]`    | 二维码容错等级      | `'L'｜'M'｜'Q'｜'H'`                 | `M`       |
+| `[boostLevel]` | 是否自动提升纠错等级 | `boolean` | `true` |
 | `(refresh)`  | 点击"点击刷新"的回调  | `EventEmitter<string>`            | -         |
 
 ---
@@ -66,7 +68,7 @@ export class FormQrCodeSimple {
         default: 'https://ng-alain.com/',
         ui: {
           widget: 'qr-code',
-          icon: 'https://ng-alain.com/assets/logo-color.svg',
+          icon: 'https://ng-alain.com/assets/img/logo-color.png',
           bordered: true
         } as SFQrCodeWidgetSchema
       },

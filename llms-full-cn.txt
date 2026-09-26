@@ -191,7 +191,7 @@ export class StartupService {
 
 > **注意：** 在项目编辑里加上 `anticon anticon-` 前缀才能同之前的类名保持一致。
 
-```
+```json
 // angular.json
 "styles": [
   "src/iconfont.css"
@@ -259,7 +259,7 @@ title: Interceptor
 type: Documents
 ---
 
-# 写在前面
+## 写在前面
 
 搭配 `httpCacheInterceptor` Http 拦截器，可以将缓存应用到 Http 请求当中。它只有几个特征：
 
@@ -268,7 +268,7 @@ type: Documents
 - 支持任何 Http 请求、任何数据格式
 - 符合 Http 缓存响应标准 `Cache-Control`
 
-# 如何使用
+## 如何使用
 
 在 `withInterceptors` 中引入 `httpCacheInterceptor`：
 
@@ -454,7 +454,7 @@ ng g ng-alain:list list -m=trade
 
 一般而言，一个模块可能会包含相同类型的业务页，而我们产生的文件结构可能希望是：
 
-```
+```txt
 sys
   log
     view
@@ -489,7 +489,7 @@ ng g ng-alain:edit [page name] --modal=false
 
 除上述默认业务页以外，也可以自定义属于项目级别业务页，例如我们创建一个自己的编辑页模板，则只需要在项目的根目录创建以下目录结构（你可以通过 [Github](https://github.com/ng-alain/ng-alain/tree/master/_cli-tpl) 上来获取）：
 
-```
+```txt
 └── _cli-tpl
 │   └── edit                                                       // 模板名称
 │       └── __path__                                               // （名称固定值）
@@ -656,7 +656,7 @@ ui 本身也是一个 JSON 结构，为了区分 JSON Schema 属性名的对应�
 
 一个完整的表单元素我们认为应该包含以下若干元素：
 
-![](./assets/img/form-input.png)
+![From Input](./assets/img/form-input.png)
 
 从左至向各元素描述：
 
@@ -1049,6 +1049,10 @@ services.AddSwaggerGen(c =>
 
 若是通过拦截器来处理异常消息时，订阅时只需要始终获取 `result` 字段数据时，可以通过指定 `--responseDataField="result"` 来解决。
 
+### 代码风格
+
+生成的文件带有 `/* eslint-disable */` 与 `/* eslint-enable prettier/prettier */` 两行头注释：前者让生成代码不受其它 lint 规则约束，后者把格式化交回项目自身的 `prettier/prettier` 规则。因此执行 `eslint --fix`（脚手架已通过 lint-staged 在提交时自动执行，也可以交给 IDE 保存时执行）即可让生成代码符合项目的代码风格。
+
 ---
 
 ---
@@ -1172,7 +1176,7 @@ npm start
 
 启动完成后会打开浏览器访问 [http://localhost:4200](http://localhost:4200)，若你看到如下页面则代表成功了。
 
-![](./assets/screenshot/start.png | width=700)
+![Start](./assets/screenshot/start.png | width=700)
 
 恭喜你，你已经成功部署一个 NG-ALAIN 项目。
 
@@ -1205,13 +1209,13 @@ npm start
 2. [![Segment Fault](https://gw.alipayobjects.com/zos/rmsportal/hfYFfCvHTQTUKntlJbMF.svg | width=140)](https://segmentfault.com/t/ng-alain)（中文）
 3. 加入 NG-ALAIN 自助服务群（中文）
 
-![](./assets/qq-group.png)
+![QQ](./assets/qq-group.png)
 
 ## 捐助
 
 如果你觉得 NG-ALAIN 不错，可以考虑自愿为本站打赏或捐助。
 
-![](./assets/donate.png)
+![Donate](./assets/donate.png)
 
 ---
 
@@ -1290,7 +1294,7 @@ NG-ALAIN 目标是提供更多通用性业务模块，让开发者更加专注�
 
 当使用 `ng add ng-alain` 生成后的 NG-ALAIN 脚手架，它的基本目录结构概略图如下：
 
-```
+```txt
 ├── _mock                                       # Mock 数据规则目录
 ├── angular.json                                # Angular 项目配置文件
 ├── src
@@ -1654,37 +1658,42 @@ ng-alain 除了提供主题方案以外，还包含一套类似 Bootstrap 的工
 ---
 order: 1000
 type: Basic
-title: 升级到 21.0 版本
+title: 升级到 22.0 版本
 ---
 
-> 本指南适用于当前版本 ng-alain >= `20` ;
+> 本指南适用于当前版本 NG-ALAIN >= `21` ;
 > 如果在升级过程中遇到问题，欢迎提出。提问前请阅读 [如何向开源社区提问题](https://github.com/seajs/seajs/issues/545)
 > 如果发现本指南存在遗漏/错误，请指出!
 > 或者你遇到了新的问题并解决了，欢迎补充!
 
 ## 开始之前
 
-1. 首先确保你 `Node.js` >= `22.21.1`
+1. 首先确保你 `Node.js` 符号 [Angular 版本兼容性](https://angular.cn/reference/versions)
 2. 创建新的分支，或者使用其他方式备份当前项目
-3. 删除项目下 `package-lock.json` 或 `yarn.lock` 文件
+3. 删除项目下 `package-lock.json` 或 `yarn.lock` 或 `pnpm-lock.yaml` 文件
 
 ## 升级步骤
 
 ### 升级相关依赖
 
-- 将项目升级到 Angular 21 运行 `ng update @angular/core@21 @angular/cli@21 angular-eslint@21 ng-zorro-antd@21 ng-alain@21`。
-- _如果你有单独使用 `@angular/cdk` 请执行 `ng update @angular/cdk@21`_
+- 将项目升级到 Angular 22 运行 `ng update @angular/core@22 @angular/cli@22 angular-eslint@22 ng-zorro-antd@22 ng-alain@22`。
+- _如果你有单独使用 `@angular/cdk` 请执行 `ng update @angular/cdk@22`_
 
 > > NG-ALAIN脚手架升级全部变更文件，请参考：[#2593](https://github.com/ng-alain/ng-alain/pull/2593/files)。
 
-### 2. ng-zorro-antd BREAKING CHANGES
+### 2. NG-ZORRO BREAKING CHANGES
 
-需要注意 NG-ZORRO 有存在 BREAKING CHANGES；细节请参考
-https://github.com/NG-ZORRO/ng-zorro-antd/releases/tag/21.0.0
+需要注意 NG-ZORRO 有存在 BREAKING CHANGES；细节请参考[22.0.0](
+https://github.com/NG-ZORRO/ng-zorro-antd/releases/tag/22.0.0)。
 
-### 3. 参考
+### 3. 可选部分
 
-- 代码风格配置变更 [#2594](https://github.com/ng-alain/ng-alain/pull/2594/files)
+- 将项目的 `packageManager` 切换为 `pnpm`
+- 从 `tsconfig.json` 中移除 `baseUrl` 配置
+
+### 4. 参考
+
+- 代码风格配置变更 [#2636](https://github.com/ng-alain/ng-alain/pull/2636/files)
 
 ---
 
@@ -1811,7 +1820,7 @@ http.get(`http://192.168.1.100/api/app`).subscribe();
 
 直接返回以下错误：
 
-```
+```txt
 Access to XMLHttpRequest at 'http://192.168.1.100/api/app' from origin 'http://localhost:4200' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 ```
 
@@ -2299,7 +2308,7 @@ NG-ALAIN 技术栈基于 Typescript、Angular、图表G2 和 NG-ZORRO，在开�
   - [Angular中文文档](https://angular.cn/docs)，建议一定要花时间阅读文档部分，透过它基本上就可以学会 Angular；同时，也是 Angular API 接口文档
   - [NG-ZORRO中文文档](https://ng.ant.design/docs/introduce/zh)，NG-ZORRO 作为 NG-ALAIN 的基础组件库，当你不懂某个组件时，它就是最好的文档，包含组件用法及API说明
   - [NG-ALAIN中文文档](https://ng-alain.com/)，包含所有 `@delon/*` 类型的用法及API说明
-  - [G2图表中文文档](https://g2.antv.vision/zh)，如果需要图表开发，则这份文档是必备
+  - [G2 图表中文文档](https://g2.antv.antgroup.com/)，如果需要图表开发，则这份文档是必备
 - 辅助类
   - [Ant Design 指引文章](https://ant.design/docs/spec/introduce-cn)，学习 Ant Design 的设计理念，非常值得阅读的部分
   - [NG-ZORRO 社区推荐](https://ng.ant.design/docs/recommendation/zh)，一份非常值得学习的清单
@@ -2512,11 +2521,11 @@ type: Documents
 
 Ant Design 设计规范上支持一定程度的样式定制，以满足业务和品牌上多样化的视觉需求，包括但不限于主色、圆角、边框和部分组件的视觉定制。
 
-![](https://zos.alipayobjects.com/rmsportal/zTFoszBtDODhXfLAazfSpYbSLSEeytoG.png)
+![Example](https://zos.alipayobjects.com/rmsportal/zTFoszBtDODhXfLAazfSpYbSLSEeytoG.png)
 
 ## 定制方式
 
-Ant Design 的样式使用了 [Less](http://lesscss.org/) 作为开发语言，并定义了一系列全局/组件的样式变量，你可以根据需求进行相应调整，默认样式变量：[NG-ZORRO](https://github.com/NG-ZORRO/ng-zorro-antd/blob/master/components/style/themes/default.less)、[NG-ALAIN]() 两部分。
+Ant Design 的样式使用了 [Less](http://lesscss.org/) 作为开发语言，并定义了一系列全局/组件的样式变量，你可以根据需求进行相应调整，默认样式变量：[NG-ZORRO](https://github.com/NG-ZORRO/ng-zorro-antd/blob/master/components/style/themes/default.less)、[NG-ALAIN](https://github.com/ng-alain/delon/blob/master/packages/theme/theme-default.less) 两部分。
 
 ### 初始化项目时定制主题
 
@@ -2653,7 +2662,7 @@ export class DashboardAnalysisComponent {}
 ```less
 // analysis.component.less
 @import '@delon/theme/index';
-:host ::ng-deep { 
+:host ::ng-deep {
   color: @text-color;
 }
 ```
@@ -2941,8 +2950,7 @@ Schema 的 `default` 用于设置初始化，一般情况下当修改表单时�
 const statusProperty = this.sf.getProperty('/status')!;
 statusProperty.schema.enum = ['1', '2', '3'];
 statusProperty.widget.reset('2');
-// 或手动触发 `detectChanges`
-// statusProperty.widget.detectChanges();
+// 无需手动触发变更检测：状态由 signal 驱动会自动刷新
 ```
 
 如果单纯更新某个元素数据，则：
@@ -2970,7 +2978,7 @@ schema: SFSchema = {
 
 由于这里的 `format: 'month'` 并不是 Json Schema 标准，因此，你可以在 Console 面板得到错误：
 
-```
+```txt
 Error: unknown format "month" ignored in schema at path "#/properties/month"
 ```
 
@@ -2988,7 +2996,7 @@ const alainConfig: AlainConfig = {
 ## 如何切换显示或隐藏某元素
 
 ```ts
-this.sf.getProperty('/mobile')?.setVisible(status).widget.detectChanges();
+this.sf.getProperty('/mobile')?.setVisible(status);
 ```
 
 ---
@@ -3002,6 +3010,8 @@ type: Documents
 ## 如何自适应容器宽高？
 
 G2 当前版本并不会根据容器宽高自适应，目前只会根据浏览器窗体大小才会重新变更图表尺寸，因此需要手动监听容器大小的变化并调用 `chart.forceFit()` 重新渲染图表尺寸。
+
+> **v5 起 `forceFit()` 返回 `Promise`**（v4 是同步）：需要等待尺寸变更完成时请 `await chart.forceFit()` 或 `void chart.forceFit()`；组件内部的自适应（`autoFit`）已在首帧与窗口 resize 时自动处理，通常无需手动调用。
 
 [comment]: <demo(resizable)>
 
@@ -3496,7 +3506,25 @@ title: 开始使用
 type: Documents
 ---
 
-图表是基于 [G2](https://antv.alipay.com/zh-cn/g2/3.x/index.html) (3.0) 的基础上二次封装，提供了业务中常用的图表套件，可以单独使用，也可以组合起来实现复杂的展示效果。
+图表是基于 [G2](https://g2.antv.antgroup.com/) (5.x) 的基础上二次封装，提供了业务中常用的图表套件，可以单独使用，也可以组合起来实现复杂的展示效果。
+
+## v4 → v5 升级须知
+
+`@antv/g2` 已由 v4 升级到 **v5**（`^5.4.8`）。组件公开 API（`[data]`、`[height]`、`[padding]`、`[theme]`、`(ready)`、`(clickItem)` 等）**名称与类型不变**（唯一例外：`g2-water-wave` 的 `[height]` 重命名为 `[size]`），但底层渲染模型改为**异步 spec**：
+
+- **渲染是异步的**：`ready` 事件在**首个 `AFTER_RENDER`（首帧真正画完）**时触发，且**只触发一次**；`loaded`（模板据此收起骨架屏）同时置为 `true`。要拿到图表实例，请订阅 `(ready)`：
+  ```html
+  <g2-bar [data]="data()" (ready)="onReady($event)" (error)="onError($event)" />
+  ```
+- **失败与 `ready` 是两层**：G2 类库未加载、渲染失败都会走 **`(error)`** 事件（同时 `console.error`），`ready` 不会触发、骨架屏不收起。
+- **不再有 `install()` 公开方法**：组件扩展点用受保护的 `afterCreate(chart)` / `onRendered()`；数据变更用 `changeData()`（内部走串行链，不会与首帧竞态）。
+- **交互降级**：v4 的 `active-region`、`drag-move` 在 v5 无等价实现，`[interaction]` 传入时会降级为无交互；其余交互映射见各组件文档。
+- **tooltip 限制**：`domStyles`、`itemTpl` 不再可用（v5 由内置 tooltip 渲染）；视图级 `tooltip` **不会传给子 mark**，需要在 mark 级设置。
+- **点击事件载荷类型**：`Event` → `G2Event`（`ev.data?.data` 为命中数据项）。
+- **`g2-tag-cloud`**：不再把 `x/y/size/rotate/font` 写回数据行（布局改用 v5 内置 `wordCloud` mark 完成，另需 `@antv/data-set` 已从依赖中移除）。
+- **`g2-water-wave`**：v4 的手写 canvas 换成 v5 的 [`liquid`](https://g2.antv.antgroup.com/examples/general/Liquid) mark（中心百分比由 G2 内置文本绘制）；**`[height]` 重命名为 `[size]`**（正方形边长）；`[animate]` **只控制进场动画**（水波自身的流动由 G2 内置、始终运行），尺寸自适应交给 `autoFit`。
+- **转置图表的固定柱厚**：v5 里转置（`coordinate.transform: [{ type: 'transpose' }]`）时，interval 的**屏幕厚度由 `style.minWidth`/`maxWidth` 夹取**（像素），`style.minHeight` 夹的是屏幕宽 —— 因此 v4 的 `.size(30)` 不能只靠 `encode.size` 复现，需同时写 `style: { minWidth: 30, maxWidth: 30 }`。
+
 
 > 图表的作用，是帮助我们更好地看懂数据。选择什么图表，需要回答的首要问题是『我有什么数据，需要用图表做什么』，而不是 『图表长成什么样』 。
 
@@ -3522,8 +3550,7 @@ const alainConfig: AlainConfig = {
   chart: { 
     // 以下是默认配置，如果项目无法外网访问，可以根据 `angular.json` 配置将依赖包直接使用 `./assets***` 路径
     libs: [
-      'https://gw.alipayobjects.com/os/lib/antv/g2/4.1.4/dist/g2.min.js',
-      'https://gw.alipayobjects.com/os/lib/antv/data-set/0.11.7/dist/data-set.js',
+      'https://gw.alipayobjects.com/os/lib/antv/g2/5.4.8/dist/g2.min.js',
     ],
   },
 };
@@ -3555,11 +3582,6 @@ export class DelonModule {
     "glob": "**/*",
     "input": "./node_modules/@antv/g2/dist",
     "output": "/@antv/g2/"
-  },
-  {
-    "glob": "**/*",
-    "input": "./node_modules/@antv/data-set/dist",
-    "output": "/@antv/data-set/"
   }
 ]
 ```
@@ -3570,10 +3592,7 @@ export class DelonModule {
 // global-config.module.ts
 const alainConfig: AlainConfig = {
   chart: { 
-    libs: [
-      './assets/@antv/g2/g2.min.js',
-      './assets/@antv/data-set/data-set.js',
-    ],
+    libs: ['./assets/@antv/g2/g2.min.js'],
   },
 };
 ```
@@ -4222,7 +4241,7 @@ npm run analyze
 npm run analyze:view
 ```
 
-![](./assets/screenshot/bundle-size.png)
+![Bundle Size](./assets/screenshot/bundle-size.png)
 
 ## 发布
 
@@ -4306,7 +4325,7 @@ NG-ALAIN 提供的 Dockerfile 文件相对于比较简单，而实际项目中�
 
 最后，增加 `docker-compose.yml` 的 `ports` 节点：
 
-```
+```yaml
 - 443:443
 ```
 
@@ -4475,7 +4494,7 @@ JSON Schema 对格式有严格的要求，例如日期格式必须遵守 [RFC333
 
 其中 `format` 是一个错误时间格式，当指定 `debug: true` 时，会在控制台接收到详细的校验错误描述：
 
-```
+```txt
 Error: unknown format "yyyy-MM-dd HH:mm:ss" is used in schema at path "#/properties/time"
 ```
 
@@ -4499,10 +4518,10 @@ ng-alain 认为这些工具类只会运用在内容区域，且秉承 Ant Design
 | ---- | --- | --- | --- |
 | `xs` | $gutter / 2 | `4px` | 超小号 |
 | `sm` | $gutter | `8px` | 小号 |
-| `md` | $gutter * 2 | `16px` | 中号 |
-| `lg` | $gutter * 3 | `24px` | 大号 |
-| `xl` | $gutter * 4 | `32px` | 特大号 |
-| `xxl` | $gutter * 6 | `48px` | 超大号 |
+| `md` | $gutter *2 | `16px` | 中号 |
+| `lg` | $gutter* 3 | `24px` | 大号 |
+| `xl` | $gutter *4 | `32px` | 特大号 |
+| `xxl` | $gutter* 6 | `48px` | 超大号 |
 
 依这些规则，衍生出 `margin`、`padding`，其命名规则如下：
 
@@ -4789,7 +4808,7 @@ Ant Design 是以 `14px` 为基准字号。
 
 ## 旋转
 
-```
+```css
 .rotate-[360 / 15]
 ```
 
@@ -5315,6 +5334,7 @@ export function withTestWidget(): SFWidgetProvideConfig {
     <!-- 开始自定义控件区域 -->
     <tinymce
       [ngModel]="value"
+      [ngModelOptions]="{ standalone: true }"
       (ngModelChange)="change($event)"
       [config]="config"
       [loading]="loading">
@@ -5349,13 +5369,23 @@ class TestWidget extends ControlWidget implements OnInit {
 }
 ```
 
+**ngModel 与表单注册**
+
+小部件模板里的 `ngModel` 只是与 `FormProperty` 同步的局部绑定，不需要也不应该注册到任何表单，因此必须声明为 `standalone`；否则 Angular v22 会在控制台给出 `NG01354` 警告。
+
+> 注意：不要按该警告的提示添加 `viewProviders: [{ provide: ControlContainer, useExisting: NgForm }]`：这会让 `ngModel` 尝试注册到 SF 内部的表单，而它没有 `name`，会直接抛出 `NG01352`。
+
 **sf-item-wrap**
 
 在模板中唯一是利用 `sf-item-wrap` 包裹自定义内容，它内部封装表单基础元素。
 
 **变更检测**
 
-小部件在渲染过程是手动变更检测，大部分情况下 `ControlWidget` 已经很好的管理什么时机应该执行变更检测，在自定义小部件过程中可能会遇到异步操作导致界面并未渲染，此时可以调用 `detectChanges()` 方法来触发一次小部件节点的变更检测。
+小部件状态全部由 signal 驱动：`ui` / `schema` 是响应式对象，组件自身的状态也应使用 `signal`。
+因此**不再需要手动触发变更检测**（`detectChanges()` 已移除），修改状态后视图会自动刷新。
+
+> 注意：`ui` / `schema` 只能**整值替换**（如 `ui.optionalHelp = { ...ui.optionalHelp, text }`）；
+> 就地修改嵌套结构（如 `schema.enum.push(...)`）不会被跟踪。
 
 ### 注册小部件
 
@@ -5849,7 +5879,7 @@ type: Pipe
 
 输出：
 
-```
+```txt
 2017年08月24日
 ```
 
@@ -6442,6 +6472,8 @@ type: Non-built-in widgets
 |----|----|----|-----|
 | `[asyncData]` | 异步静态数据源 | `(node: NzCascaderOption, index: number, me: CascaderWidget) => PromiseLike<any>` | - |
 | `[size]` | 大小，等同 `nzSize` | `string` | - |
+| `[variant]` | 变体 | `outlined,borderless,filled,underlined` | `outlined` |
+| `[autoFocus]` | 默认获取焦点 | `boolean` | `false` |
 | `[placeholder]` | 在文字框中显示提示讯息 | `string` | - |
 | `[showSearch]` | 是否支持搜索 | `bool` | `false` |
 | `[allowClear]` | 是否显示清除按钮 | `bool` | `true` |
@@ -6454,7 +6486,6 @@ type: Non-built-in widgets
 | `[columnClassName]` | 弹出菜单中数据列的自定义样式 | `string` | - |
 | `[notFoundContent]` | 当下拉列表为空时显示的内容 | `string` | - |
 | `[data]` | 初始化列数据，用于第一列的数据，子列通过选项的 `children` 加载，或者通过 `load` 事件异步加载。 | `Array` | - |
-| `[enableCache]` | 是否缓存异步加载的数据，若每次异步加载的数据都是变化的，需将该值设置为 false | `bool` | `true` |
 | `[expandTrigger]` | 次级菜单的展开方式，可选 'click' 和 'hover' | `string` | `click` |
 | `[changeOnSelect]` | 当此项为 true 时，点选每级菜单选项值都会发生变化，具体见上面的演示 | `bool` | `false` |
 | `[changeOn]` | 可通过自定义的函数来判断点击菜单选项是否应该发生变化，当函数返回 true 时，将发生变化 | `(option: NzCascaderOption, level: number) => boolean` | - |
@@ -6462,7 +6493,8 @@ type: Non-built-in widgets
 | `[valueProperty]` | 值 `value` 的属性名称 | `string` | `value` |
 | `[labelProperty]` | 值 `label` 的属性名称 | `string` | `label` |
 | `[multiple]` | 是否多选 | `boolean` | `false` |
-| `(visibleChange)` | 异步加载事件 | `(value: boolean) => void` | - |
+| `[suffixIcon]` | 自定义的选择框后缀图标 | `TemplateRef<any>, string` | - |
+| `(openChange)` | 下拉菜单打开关闭回调函数 | `(status: boolean) => void` | - |
 | `(change)` | 选项值变更事件 | `(values: any[]) => void` | - |
 | `(selectionChange)` | 选项变更事件 | `(values: NzCascaderOption[]) => void` | - |
 | `(clear)` | 内容被清空事件 | `() => void` | - |
@@ -6601,8 +6633,9 @@ module: import { ChartEChartsModule } from '@delon/chart/chart-echarts';
 | `[height]` | 图表高度 | `number, string` | `400px`|
 | `[option]` | [配置项](https://echarts.apache.org/zh/option.html#title) | `ChartEChartsOption` | - |
 | `[theme]` | [主题](https://echarts.apache.org/zh/theme-builder.html)配置 | `string, object` | - |
+| `[initOpt]` | [init](https://echarts.apache.org/zh/api.html#echarts.init) 的初始化参数（如 `renderer`、`devicePixelRatio`），变更会重建实例 | `object` | - |
 | `[on]` | 等同于 ECharts [on](https://echarts.apache.org/zh/api.html#echartsInstance.on) | `ChartEChartsOn[]` | - |
-| `(events)` | 事件回调 | `EventEmitter<ChartEChartsEvent>` | - |
+| `(events)` | 事件回调 | `output<ChartEChartsEvent>` | - |
 
 ---
 
@@ -6618,23 +6651,23 @@ type: Widgets
 
 ### schema 属性
 
-成员 | 说明 | 类型 | 默认值
-----|------|-----|------
-`[enum]` | 数据源，当数据源存在于表示一组多选框 | `SFSchemaEnumType[]` | -
-`[readOnly]` | 禁用状态  | `boolean` | -
-`[title]` | 无 `enum` 时表示多选框文本内容  | `string` | -
-`[description]` | 无 `enum` 时表示多选框后帮助信息  | `string` | -
+| 成员            | 说明                                 | 类型                 | 默认值 |
+| --------------- | ------------------------------------ | -------------------- | ------ |
+| `[enum]`        | 数据源，当数据源存在于表示一组多选框 | `SFSchemaEnumType[]` | -      |
+| `[readOnly]`    | 禁用状态                             | `boolean`            | -      |
+| `[title]`       | 无 `enum` 时表示多选框文本内容       | `string`             | -      |
+| `[description]` | 无 `enum` 时表示多选框后帮助信息     | `string`             | -      |
 
 ### ui 属性
 
-成员 | 说明 | 类型 | 默认值
-----|------|-----|------
-`[asyncData]` | 异步数据源  | `() => Observable<SFSchemaEnumType[]>` | -
-`[span]` | 指定每个选框单元格数量 | `number` | -
-`[styleType]` | radio的样式  | `default, button` | `default`
-`[checkAll]` | 是否需要全选  | `boolean` | -
-`[checkAllText]` | 全选按钮文本  | `string` | `全选`
-`[change]` | 值变更事件，参数：单个多选框为 `boolean`，否则为 `SFSchemaEnum[]` | `(res: boolean | SFSchemaEnum[]) => void` | -
+| 成员             | 说明                                                              | 类型                                       | 默认值    |
+| ---------------- | ----------------------------------------------------------------- | ------------------------------------------ | --------- |
+| `[asyncData]`    | 异步数据源                                                        | `() => Observable<SFSchemaEnumType[]>`     | -         |
+| `[span]`         | 指定每个选框单元格数量                                            | `number`                                   | -         |
+| `[styleType]`    | radio的样式                                                       | `default, button`                          | `default` |
+| `[checkAll]`     | 是否需要全选                                                      | `boolean`                                  | -         |
+| `[checkAllText]` | 全选按钮文本                                                      | `string`                                   | `全选`    |
+| `[change]`       | 值变更事件，参数：单个多选框为 `boolean`，否则为 `SFSchemaEnum[]` | `(res: boolean \| SFSchemaEnum[]) => void` | -         |
 
 ---
 
@@ -6660,11 +6693,14 @@ type: Non-built-in widgets
 | `[format]`       | 颜色格式       | `rgb`｜`hex`｜`hsb`                 | `hex`    |
 | `[defaultValue]` | 颜色默认的值     | `string`｜`NzColor`                  | -        |
 | `[allowClear]`   | 允许清除选择的颜色  | `boolean`                         | `false`  |
+| `[disabledAlpha]` | 禁用透明度选择 | `boolean`                         | `false`  |
+| `[presets]`      | 预设颜色列表 | `NzPresetColor[]` | - |
 | `[trigger]`      | 颜色选择器的触发模式 | `hover`｜`click`                   | `click`  |
 | `[showText]`      | 显示颜色文本     | `boolean`                         | `false`  |
 | `[title]`      | 设置颜色选择器的标题 | `TemplateRef<void>`｜`string`      | -        |
 | `(change)`     | 颜色变化的回调    | `EventEmitter<{ color: NzColor; format: string }>` | -        |
 | `(formatChange)`      | 颜色格式变化的回调  | `EventEmitter<'rgb'｜'hex'｜'hsb'>` | -        |
+| `(onClear)`      | 清除按钮点击回调  | `() => void` | -        |
 | `[block]`   | 是否颜色块  | `boolean`                         | `false`  |
 
 ---
@@ -6681,7 +6717,7 @@ module: import { CountDownModule } from '@delon/abc/count-down';
 
 ## 依赖
 
-```
+```bash
 npm i -S ngx-countdown
 ```
 
@@ -6816,6 +6852,8 @@ type: Widgets
 | `[inline]` | 内联模式 | `boolean` | `false` |
 | `[separator]` | 分隔符 | `string, TemplateRef` | `'~'` |
 | `[showWeekNumber]` | 是否在每一行显示周数（仅日期选择器支持。周选择器始终显示周数） | `boolean` | `false` |
+| `[ranges]` | 预设时间范围快捷选择（仅 `range` 模式有效） | `{ [key: string]: Date[] \| (() => Date[]) }` | - |
+| `[autoFocus]` | 自动获取焦点 | `boolean` | `false` |
 | `[onOk]` | 点击确定按钮的回调 | `(data: Date | Date[]) => void` | - |
 | `[change]` | 时间发生变化的回调 | `(data: Date | Date[]) => void` | - |
 
@@ -6884,7 +6922,10 @@ getTimeDistance('week')
 title: decorator
 subtitle: 装饰器
 type: Tools
+deprecated: 24.0.0
 ---
+
+# 将在 v24.0.0 移除。
 
 ## @ZoneOutside
 
@@ -7364,14 +7405,15 @@ module: import { G2BarModule } from '@delon/chart/bar';
 | `[delay]` | 延迟渲染，单位：毫秒 | `number` | `0` |
 | `[title]` | 图表标题 | `string,TemplateRef<void>` | - |
 | `[color]` | 图表颜色 | `string` | `rgba(24, 144, 255, 0.85)` |
-| `[padding]` | 图表内部间距 | `Array<number | string> | string` | `[32, 0, 32, 40]` |
+| `[padding]` | 图表内部间距，`'auto'` 表示由 G2 自动计算 | `Array<number \| string> \| string` | `'auto'` |
 | `[height]` | 图表高度 | `number` | - |
 | `[data]` | 数据 | `G2BarData[]` | `[]` |
 | `[autoLabel]` | 在宽度不足时，自动隐藏 x 轴的 label | `boolean` | `true` |
 | `[interaction]` | 交互类型，none 无 element-active 图形元素，active-region 图表组件，brush 框选，drag-move 移动 | `InteractionType` | `none` |
-| `[theme]` | 定制图表主题 | `string | LooseObject` | - |
-| `(clickItem)` | 点击项回调 | `EventEmitter<G2BarClickItem>` | - |
-| `(ready)` | 当G2完成初始化后调用 | `EventEmitter<Chart>` | - |
+| `[theme]` | 定制图表主题 | `string \| LooseObject` | - |
+| `(clickItem)` | 点击项回调 | `output<G2BarClickItem>` | - |
+| `(ready)` | 当G2完成初始化后调用 | `output<Chart>` | - |
+| `(error)` | 当渲染失败时调用（G2 未加载或渲染抛错），此时 `(ready)` 不会触发 | `output<unknown>` | - |
 
 ### G2BarData
 
@@ -7406,6 +7448,7 @@ module: import { G2CardModule } from '@delon/chart/card';
 | `[footer]` | 卡片底部 | `string,TemplateRef<void>` | - |
 | `[contentHeight]` | 内容区域高度（单位：`px`） | `string` | - |
 | `[bordered]` | 是否显示边框 | `boolean` | `false` |
+| `[loading]` | 是否显示加载中（内容区包裹 `nz-spin`） | `boolean` | `false` |
 
 ---
 
@@ -7445,8 +7488,8 @@ export class DemoComponent {
 
 ## 链接
 
-- [G2 文档](https://www.yuque.com/antv/g2-docs)
-- [G2 示例](https://antv.alipay.com/zh-cn/g2/3.x/demo/index.html)
+- [G2 文档](https://g2.antv.antgroup.com/)
+- [G2 示例](https://g2.antv.antgroup.com/examples)
 
 ## API
 
@@ -7454,13 +7497,16 @@ export class DemoComponent {
 
 | 参数 | 说明 | 类型 | 默认值 |
 |----|----|----|-----|
+| `[repaint]` | 数据再次变更时是否重绘 | `boolean` | `true` |
 | `[delay]` | 延迟渲染，单位：毫秒 | `number` | `0` |
 | `[height]` | 高 | `number` | - |
-| `[resizeTime]` | resize 事件去抖时长 | `number` | `200` |
-| `(render)` | 渲染事件 | `EventEmitter<ElementRef>` | - |
-| `(resize)` | resize 事件 | `EventEmitter<ElementRef>` | - |
-| `(destroy)` | 销毁事件 | `EventEmitter<ElementRef>` | - |
-| `[theme]` | 定制图表主题 | `string | LooseObject` | - |
+| `[resizeTime]` | resize 事件去抖时长（`0` 表示关闭 resize 监听） | `number` | `0` |
+| `(render)` | 渲染事件 | `output<ElementRef>` | - |
+| `(resize)` | resize 事件 | `output<ElementRef>` | - |
+| `(destroy)` | 销毁事件（**当前版本不会触发，为兼容保留**） | `output<ElementRef>` | - |
+| `(ready)` | 当G2完成初始化后调用 | `output<Chart>` | - |
+| `(error)` | 当渲染失败时调用（G2 未加载或渲染抛错），此时 `(ready)` 不会触发 | `output<unknown>` | - |
+| `[theme]` | 定制图表主题 | `string \| LooseObject` | - |
 
 ---
 
@@ -7484,13 +7530,16 @@ module: import { G2GaugeModule } from '@delon/chart/gauge';
 | `[delay]` | 延迟渲染，单位：毫秒 | `number` | `0` |
 | `[title]` | 图表标题 | `string` | - |
 | `[height]` | 图表高度 | `number` | - |
+| `[width]` | 图表宽度 | `number` | - |
 | `[color]` | 图表颜色 | `string` | `#2F9CFF` |
 | `[bgColor]` | 图表背景色 | `string` | `#F0F2F5` |
 | `[percent]` | 进度比例 | `number` | - |
-| `[padding]` | 内边距 | `Array<number | string>` | `[10, 10, 30, 10]` |
+| `[fontSize]` | 图表字号，决定标题字号（数值为 `1.4em` 跟随缩放） | `number` | `14` |
+| `[padding]` | 内边距 | `Array<number \| string>` | `16` |
 | `[format]` | 坐标轴格式 | `(text: string, item: {}, index: number) => string` | - |
-| `[theme]` | 定制图表主题 | `string | LooseObject` | - |
-| `(ready)` | 当G2完成初始化后调用 | `EventEmitter<Chart>` | - |
+| `[theme]` | 定制图表主题 | `string \| LooseObject` | - |
+| `(ready)` | 当G2完成初始化后调用 | `output<Chart>` | - |
+| `(error)` | 当渲染失败时调用（G2 未加载或渲染抛错），此时 `(ready)` 不会触发 | `output<unknown>` | - |
 
 ---
 
@@ -7514,18 +7563,21 @@ module: import { G2MiniAreaModule } from '@delon/chart/mini-area';
 | `[delay]` | 延迟渲染，单位：毫秒 | `number` | `0` |
 | `[color]` | 图表颜色 | `string` | `rgba(24, 144, 255, 0.2)` |
 | `[borderColor]` | 图表边颜色 | `string` | `#1890FF` |
+| `[borderWidth]` | 图表边粗细 | `number` | `2` |
+| `[fit]` | 是否自适应容器尺寸（`autoFit`） | `boolean` | `true` |
 | `[height]` | 图表高度 | `number` | `56` |
 | `[line]` | 是否显示描边 | `boolean` | `false` |
 | `[animate]` | 是否显示动画 | `boolean` | `true` |
 | `[padding]` | 图表内部间距 | `array` | `[8, 8, 8, 8]` |
-| `[xAxis]` | [x 轴配置](https://www.yuque.com/antv/g2-docs/api-chart#ef1eaedc) | `object` | - |
-| `[yAxis]` | [y 轴配置](https://www.yuque.com/antv/g2-docs/api-chart#ef1eaedc) | `object` | - |
+| `[xAxis]` | x 轴配置（按 v5 AxisComponent 传参） | `object` | - |
+| `[yAxis]` | y 轴配置（按 v5 AxisComponent 传参） | `object` | - |
 | `[yTooltipSuffix]` | y 轴Tooltip后缀，一般指定单位 | `string` | - |
 | `[tooltipType]` | Tooltip显示类型 | `'mini','default'` | `'default'` |
 | `[data]` | 数据 | `G2MiniAreaData[]` | - |
-| `[theme]` | 定制图表主题 | `string | LooseObject` | - |
-| `(clickItem)` | 点击项回调 | `EventEmitter<G2MiniAreaClickItem>` | - |
-| `(ready)` | 当G2完成初始化后调用 | `EventEmitter<Chart>` | - |
+| `[theme]` | 定制图表主题 | `string \| LooseObject` | - |
+| `(clickItem)` | 点击项回调 | `output<G2MiniAreaClickItem>` | - |
+| `(ready)` | 当G2完成初始化后调用 | `output<Chart>` | - |
+| `(error)` | 当渲染失败时调用（G2 未加载或渲染抛错），此时 `(ready)` 不会触发 | `output<unknown>` | - |
 
 ### G2MiniAreaData
 
@@ -7561,9 +7613,10 @@ module: import { G2MiniBarModule } from '@delon/chart/mini-bar';
 | `[borderWidth]` | 线条粗细 | `number` | `5` |
 | `[padding]` | 图表内部间距 | `array` | `[8, 8, 8, 8]` |
 | `[data]` | 数据 | `G2MiniBarData[]` | - |
-| `[theme]` | 定制图表主题 | `string | LooseObject` | - |
-| `(clickItem)` | 点击项回调 | `EventEmitter<G2MiniBarClickItem>` | - |
-| `(ready)` | 当G2完成初始化后调用 | `EventEmitter<Chart>` | - |
+| `[theme]` | 定制图表主题 | `string \| LooseObject` | - |
+| `(clickItem)` | 点击项回调 | `output<G2MiniBarClickItem>` | - |
+| `(ready)` | 当G2完成初始化后调用 | `output<Chart>` | - |
+| `(error)` | 当渲染失败时调用（G2 未加载或渲染抛错），此时 `(ready)` 不会触发 | `output<unknown>` | - |
 
 ### G2MiniBarData
 
@@ -7619,23 +7672,26 @@ module: import { G2PieModule } from '@delon/chart/pie';
 | `[animate]` | 是否显示动画 | `boolean` | `true` |
 | `[color]` | 图表颜色 | `string` | `rgba(24, 144, 255, 0.85)` |
 | `[height]` | 图表高度 | `number` | - |
+| `[fontSize]` | 图表文字基准字号（图例继承该字号，中心数值按 `em` 缩放） | `number` | `14` |
 | `[hasLegend]` | 是否显示 legend | `boolean` | `false` |
 | `[padding]` | 图表内部间距 | `number[]` | `[12, 0, 12, 0]` |
 | `[percent]` | 占比 | `number` | - |
+| `[select]` | 是否支持分片选中（**当前版本未实现，为兼容保留的空转输入**） | `boolean` | `true` |
 | `[lineWidth]` | 边框粗细 | `number` | `0` |
 | `[inner]` | 内部极坐标系的半径 | `number` | `0.75` |
 | `[blockMaxWidth]` | 多少宽度为块显示 | `number` | `380` |
 | `[tooltip]` | 是否显示 tooltip | `boolean` | `true` |
-| `[subTitle]` | 图表子标题 | `string,TemplateRef<void><void>` | - |
-| `[total]` | 总量 | `string,number,TemplateRef<void><void>` | - |
+| `[subTitle]` | 图表子标题 | `string,TemplateRef<void>` | - |
+| `[total]` | 总量 | `string,number,TemplateRef<void>` | - |
 | `[valueFormat]` | y轴格式化 | `(y: number) => string` | - |
 | `[data]` | 数据 | `G2PieData[]` | - |
 | `[colors]` | 颜色列表 | `string[]` | - |
 | `[interaction]` | 交互类型，none 无 element-active 图形元素，active-region 图表组件，brush 框选，drag-move 移动 | `InteractionType` | `none` |
 | `[ratio]` | 百分比配置项 | `G2PieRatio` | `{ text: '占比', inverse: '反比', color: '', inverseColor: '#F0F2F5' }` |
-| `[theme]` | 定制图表主题 | `string | LooseObject` | - |
-| `(clickItem)` | 点击项回调 | `EventEmitter<G2PieClickItem>` | - |
-| `(ready)` | 当G2完成初始化后调用 | `EventEmitter<Chart>` | - |
+| `[theme]` | 定制图表主题 | `string \| LooseObject` | - |
+| `(clickItem)` | 点击项回调 | `output<G2PieClickItem>` | - |
+| `(ready)` | 当G2完成初始化后调用 | `output<Chart>` | - |
+| `(error)` | 当渲染失败时调用（G2 未加载或渲染抛错），此时 `(ready)` 不会触发 | `output<unknown>` | - |
 
 ### G2PieData
 
@@ -7666,13 +7722,15 @@ module: import { G2RadarModule } from '@delon/chart/radar';
 | `[delay]` | 延迟渲染，单位：毫秒 | `number` | `0` |
 | `[title]` | 图表标题 | `string,TemplateRef<void>` | - |
 | `[height]` | 图表高度 | `number` | - |
-| `[hasLegend]` | 是否显示 legend | `boolean` | `false` |
-| `[padding]` | 图表内部间距 | `array` | `[24, 30, 16, 30]` |
-| `[colors]` | 颜色列表 | `string[]` | - |
+| `[hasLegend]` | 是否显示 legend | `boolean` | `true` |
+| `[padding]` | 图表内部间距 | `array` | `[44, 30, 16, 30]` |
+| `[tickCount]` | y 轴刻度数量 | `number` | `4` |
+| `[colors]` | 颜色列表 | `string[]` | `['#1890FF', '#FACC14', '#2FC25B', '#8543E0', '#F04864', '#13C2C2', '#fa8c16', '#a0d911']` |
 | `[data]` | 数据 | `G2RadarData[]` | - |
-| `[theme]` | 定制图表主题 | `string | LooseObject` | - |
-| `(clickItem)` | 点击项回调 | `EventEmitter<G2RadarClickItem>` | - |
-| `(ready)` | 当G2完成初始化后调用 | `EventEmitter<Chart>` | - |
+| `[theme]` | 定制图表主题 | `string \| LooseObject` | - |
+| `(clickItem)` | 点击项回调 | `output<G2RadarClickItem>` | - |
+| `(ready)` | 当G2完成初始化后调用 | `output<Chart>` | - |
+| `(error)` | 当渲染失败时调用（G2 未加载或渲染抛错），此时 `(ready)` 不会触发 | `output<unknown>` | - |
 
 ### G2RadarData
 
@@ -7709,11 +7767,13 @@ module: import { G2SingleBarModule } from '@delon/chart/single-bar';
 | `[min]` | 最小值 | `number` | `0` |
 | `[max]` | 最大值，若小于0表示显示负值 | `number` | `100` |
 | `[padding]` | 图表内部间距 | `any` | `0` |
+| `[line]` | 是否显示中位线（`(min + max) / 2` 处的横线） | `boolean` | `false` |
 | `[value]` | 值 | `number` | `0` |
 | `[format]` | 显示值格式 | `(value: number) => string` | - |
 | `[textStyle]` | 显示值样式 | `any` | `{ fontSize: 12, color: '#595959' }` |
-| `[theme]` | 定制图表主题 | `string | LooseObject` | - |
-| `(ready)` | 当G2完成初始化后调用 | `EventEmitter<Chart>` | - |
+| `[theme]` | 定制图表主题 | `string \| LooseObject` | - |
+| `(ready)` | 当G2完成初始化后调用 | `output<Chart>` | - |
+| `(error)` | 当渲染失败时调用（G2 未加载或渲染抛错），此时 `(ready)` 不会触发 | `output<unknown>` | - |
 
 ---
 
@@ -7734,13 +7794,15 @@ module: import { G2TagCloudModule } from '@delon/chart/tag-cloud';
 | 参数 | 说明 | 类型 | 默认值 |
 |----|----|----|-----|
 | `[repaint]` | 数据再次变更时是否重绘 | `boolean` | `true` |
-| `[delay]` | 延迟渲染，单位：毫秒 | `number` | `200` |
+| `[delay]` | 延迟渲染，单位：毫秒 | `number` | `0` |
 | `[height]` | 高度值 | `number` | `200` |
 | `[width]` | 宽度值，若不指定自动按宿主元素的宽度 | `number` | `0` |
+| `[padding]` | 图表内部间距 | `number \| number[] \| 'auto'` | `0` |
 | `[data]` | 数据 | `G2TagCloudData[]` | `[]` |
-| `[theme]` | 定制图表主题 | `string | LooseObject` | - |
-| `(clickItem)` | 点击项回调 | `EventEmitter<G2TagCloudClickItem>` | - |
-| `(ready)` | 当G2完成初始化后调用 | `EventEmitter<Chart>` | - |
+| `[theme]` | 定制图表主题 | `string \| LooseObject` | - |
+| `(clickItem)` | 点击项回调 | `output<G2TagCloudClickItem>` | - |
+| `(ready)` | 当G2完成初始化后调用 | `output<Chart>` | - |
+| `(error)` | 当渲染失败时调用（G2 未加载或渲染抛错），此时 `(ready)` 不会触发 | `output<unknown>` | - |
 
 ### G2TagCloudData
 
@@ -7774,22 +7836,23 @@ module: import { G2TimelineModule } from '@delon/chart/timeline';
 | `[data]` | 数据，注：根据 `maxAxis` 值传递指标数据 | `G2TimelineData[]` | - |
 | `[titleMap]` | 指标别名 | `G2TimelineMap` | - |
 | `[colorMap]` | 颜色 | `G2TimelineMap` | `{ y1: '#5B8FF9', y2: '#5AD8A6', y3: '#5D7092', y4: '#F6BD16', y5: '#E86452' }` |
-| `[height]` | 高度值 | `number` | `400` |
+| `[height]` | 高度值 | `number` | `450` |
 | `[padding]` | 图表内部间距 | `number[]` | `[40, 8, 64, 40]` |
 | `[borderWidth]` | 线条 | `number` | `2` |
 | `[mask]` | 日期格式，使用 [G2 Mask日期格式](https://g2.antv.vision/zh/docs/manual/tutorial/scale#time) | `string` | `HH:mm` |
 | `[maskSlider]` | 滑动条日期格式，使用 [date-fns 日期格式](https://www.unicode.org/reports/tr35/tr35-dates.html#Date_Field_Symbol_Table) | `string` | `HH:mm` |
 | `[position]` | 标题位置 | `'top','right','bottom','left'` | `'top'` |
 | `[slider]` | 是否需要滑动条 | `boolean` | `true` |
-| `[theme]` | 定制图表主题 | `string | LooseObject` | - |
-| `(clickItem)` | 点击项回调 | `EventEmitter<G2TimelineClickItem>` | - |
-| `(ready)` | 当G2完成初始化后调用 | `EventEmitter<Chart>` | - |
+| `[theme]` | 定制图表主题 | `string \| LooseObject` | - |
+| `(clickItem)` | 点击项回调 | `output<G2TimelineClickItem>` | - |
+| `(ready)` | 当G2完成初始化后调用 | `output<Chart>` | - |
+| `(error)` | 当渲染失败时调用（G2 未加载或渲染抛错），此时 `(ready)` 不会触发 | `output<unknown>` | - |
 
 ### G2TimelineData
 
 | 参数 | 说明 | 类型 | 默认值 |
 |----|----|----|-----|
-| `[time]` | 日期格式 | `Date | number` | - |
+| `[time]` | 日期格式 | `Date \| number` | - |
 | `[y1]` | 指标1数据 | `number` | - |
 | `[y2]` | 指标2数据 | `number` | - |
 | `[y3]` | 指标3数据 | `number` | - |
@@ -7816,9 +7879,9 @@ type: G2
 module: import { G2WaterWaveModule } from '@delon/chart/water-wave';
 ---
 
-水波图是一种比例的展示方式，可以更直观的展示关键值的占比。
+水波图是一种比例的展示方式，可以更直观的展示关键值的占比。渲染基于 G2 v5 的 [`liquid`](https://g2.antv.antgroup.com/examples/general/Liquid) 图形标记。
 
-> 默认不支持父元素自适应，可以监听父元素的变化并使用 `render()` 方法来重置渲染。
+> 尺寸自适应由 v5 的 `autoFit` 负责；容器比 `[size]` 更窄时请直接调小 `[size]`。需要手动重绘时使用公开的 `render()`。
 
 ## API
 
@@ -7826,12 +7889,17 @@ module: import { G2WaterWaveModule } from '@delon/chart/water-wave';
 
 | 参数 | 说明 | 类型 | 默认值 |
 |----|----|----|-----|
-| `[animate]` | 是否显示动画 | `boolean` | `true` |
+| `[repaint]` | 数据再次变更时是否重绘 | `boolean` | `true` |
 | `[delay]` | 延迟渲染，单位：毫秒 | `number` | `0` |
+| `[animate]` | 是否显示进场动画（水波自身的流动由 G2 内置、始终运行） | `boolean` | `true` |
 | `[title]` | 图表标题 | `string,TemplateRef<void>` | - |
-| `[height]` | 图表高度 | `number` | `160` |
-| `[color]` | 图表颜色 | `string` | `#1890FF` |
-| `[percent]` | 进度比例 | `number` | - |
+| `[size]` | 图表尺寸（正方形边长） | `number` | `160` |
+| `[color]` | 图表颜色（水波与圆环同色） | `string` | `#1890FF` |
+| `[percent]` | 进度比例，取值 `0` ~ `100` | `number` | - |
+| `[padding]` | 图表内部间距 | `number \| number[] \| 'auto'` | `8` |
+| `[theme]` | 定制图表主题 | `string \| LooseObject` | - |
+| `(ready)` | 当G2完成初始化后调用 | `output<Chart>` | - |
+| `(error)` | 当渲染失败时调用（G2 未加载或渲染抛错），此时 `(ready)` 不会触发 | `output<unknown>` | - |
 
 ---
 
@@ -7936,7 +8004,7 @@ const data = { 1: '正常', 2: '删除' };
 
 若希望保持键名为 `number` 数字型：
 
-```
+```ts
 @for (item of data | keys: true; track $index) {
   <div >{{item.key}} {{item.value | json}}</div>
 }
@@ -8198,13 +8266,16 @@ type: Non-built-in widgets
 |----|----|----|-----|
 | `[asyncData]` | 异步静态数据源 | `(input: string) => Observable<SFSchemaEnumType[]>` | - |
 | `[size]` | 大小，等同 `nzSize` | `string` | - |
+| `[variant]` | 变体 | `outlined,borderless,filled,underlined` | `outlined` |
 | `[placeholder]` | 在文字框中显示提示讯息 | `string` | - |
+| `[allowClear]` | 允许清除 | `boolean` | `false` |
 | `[loadData]` | 实时数据 | `(option: MentionOnSearchTypes) => Observable<SFSchemaEnumType[]>` | - |
 | `[notFoundContent]` | 未找到时的内容 | `string` | `无匹配结果，轻敲空格完成输入` |
-| `[placement]` | 建议框位置 | `button,top` | `button` |
+| `[placement]` | 建议框位置 | `bottom,top` | `bottom` |
 | `[prefix]` | 触发弹出下拉框的字符 | `'string'` `'string[]'` | `@` |
 | `[valueWith]` | 建议选项的取值方法 | `(value: any) => string` | - |
 | `[select]` | 下拉框选择建议时回调 | `(value: any) => void` | - |
+| `(onClear)` | 内容被清除时回调 | `() => void` | - |
 | `[inputStyle]` | 文本框类型 | `text, textarea` | `text` |
 | `[autosize]` | 自适应内容高度，可设置对象：`{ minRows: 2, maxRows: 6 }` | `{ minRows?: number; maxRows?: number }` | `{ minRows: 1, maxRows: 0 }` |
 
@@ -8501,6 +8572,10 @@ order: 5
 
 | 成员 | 说明 | 类型 | 默认值 |
 |----|----|----|-----|
+| `[variant]` | 变体 | `outlined,borderless,filled,underlined` | `outlined` |
+| `[addOnBefore]` | 带标签的 input，设置前置标签 | `string` | - |
+| `[addOnAfter]` | 带标签的 input，设置后置标签 | `string` | - |
+| `[autofocus]` | 自动获取焦点 | `boolean` | `false` |
 | `[prefix]` | 前缀，简化 `nzFormatter`、`nzParser` 的使用 | - | - |
 | `[unit]` | 单位，简化 `nzFormatter`、`nzParser` 的使用 | - | - |
 | `[formatter]` | 等同 `nzFormatter` | - | - |
@@ -8509,6 +8584,9 @@ order: 5
 | `[widgetWidth]` | 指定 `nz-number` 宽度 | `number, string` | `90` |
 | `[hideStep]` | 隐藏步数操作区 | `boolean` | `false` |
 | `[change]` | 变更事件 | `(val?: number) => void` | - |
+| `(focus)` | 获得焦点时回调 | `() => void` | - |
+| `(blur)` | 失去焦点时回调 | `() => void` | - |
+| `[changeOnWheel]` | 是否启用鼠标滚轮控制 | `boolean` | `true` |
 
 ## QA
 
@@ -8929,8 +9007,10 @@ type: Non-built-in widgets
 | `[icon]`     | 二维码中 icon 地址 | `string`                          | -         |
 | `[iconSize]` | 二维码中 icon 大小 | `number`                          | `40`      |
 | `[bordered]` | 是否有边框        | `boolean`                         | `true`    |
-| `[status]`   | 二维码状态        | `'active'｜'expired' ｜'loading'`   | `active`  |
+| `[type]`     | 渲染类型          | `canvas,svg`                      | `canvas`  |
+| `[status]`   | 二维码状态        | `'active'｜'expired' ｜'loading' ｜'scanned'` | `active`  |
 | `[level]`    | 二维码容错等级      | `'L'｜'M'｜'Q'｜'H'`                 | `M`       |
+| `[boostLevel]` | 是否自动提升纠错等级 | `boolean` | `true` |
 | `(refresh)`  | 点击"点击刷新"的回调  | `EventEmitter<string>`            | -         |
 
 ---
@@ -9052,8 +9132,10 @@ type: Non-built-in widgets
 |----|----|----|-----|
 | `[allowClear]` | 是否允许再次点击后清除 | `boolean` | `true` |
 | `[autoFocus]` | 自动获取焦点 | `boolean` | `false` |
+| `[character]` | 自定义字符 | `TemplateRef<{ $implicit: number }>` | - |
 | `[text]` | 提醒文本模板，`{{value}}` 表示当前值（注意无任何空格） | `string` | - |
 | `[tooltips]` | 自定义每项的提示信息 | `string[]` | `[]` |
+| `(hoverChange)` | 鼠标经过时数值变化的回调 | `(value: number) => void` | - |
 
 ---
 
@@ -9149,14 +9231,14 @@ module: import { ReuseTabModule } from '@delon/abc/reuse-tab';
 
 可复用：
 
-```
-{ text:'Dashboard' }
+```ts
+{ text:'Dashboard' },
 { text:'Dashboard', reuse: true }
 ```
 
 不可复用：
 
-```
+```ts
 { text:'Dashboard', reuse: false }
 ```
 
@@ -9166,14 +9248,14 @@ module: import { ReuseTabModule } from '@delon/abc/reuse-tab';
 
 可复用：
 
-```
+```ts
 { text:'Dashboard', reuse: true }
 ```
 
 不可复用：
 
-```
-{ text:'Dashboard' }
+```ts
+{ text:'Dashboard' },
 { text:'Dashboard', reuse: false }
 ```
 
@@ -9561,6 +9643,8 @@ type: Non-built-in widgets
 | 成员 | 说明 | 类型 | 默认值 |
 |----|----|----|-----|
 | `[block]` | 将宽度调整为父元素宽度的选项 | `boolean` | false |  |
+| `[vertical]` | 是否启用垂直模式 | `boolean` | `false` |  |
+| `[shape]` | 分段形状 | `default,round` | `default` |  |
 | `[asyncData]` | 异步数据 | `() => Observable<NzSegmentedOptions>` | - |  |
 | `(valueChange)` | 当前选中项目变化时触发回调 | `(data: { index: number; item: SFValue }) => void` | - |  |
 
@@ -9775,10 +9859,14 @@ type: Non-built-in widgets
 成员 | 说明 | 类型 | 默认值
 ----|------|-----|------
 `[range]` | 当添加该属性时，启动双滑块模式 | `Boolean` | -
+`[step]` | 步长；`marks` 不为空对象时可设为 `null`，此时可选值仅有 `marks` 标出的部分；未设置时以 `multipleOf` 为准 | `number, null` | `multipleOf` |
 `[marks]` | 刻度标记 | `NzMarks` | -
 `[dots]` | 是否只能拖拽到刻度上 | `Boolean` | `false`
 `[included]` | 是否包含。`marks` 不为空对象时有效，值为 `true` 时表示值为包含关系，`false` 表示并列 | `Boolean` | `true`
 `[vertical]` | 竖直显示。添加该属性时，Slider 为垂直方向。 | `boolean` | `false`
+`[reverse]` | 反向坐标轴 | `boolean` | `false`
+`[tooltipVisible]` | 值为 `always` 时总是显示，值为 `never` 时在任何情况下都不显示 | `default,always,never` | `default`
+`[tooltipPlacement]` | 设置 Tooltip 的默认位置 | `string` | -
 `[afterChange]` | 与 `onmouseup` 触发时机一致，把当前值作为参数传入。 | `(value: NzSliderValue) => void` | -
 `[formatter]` | Slider 会把当前值传给 `nzTipFormatter`，并在 Tooltip 中显示 `nzTipFormatter` 的返回值，若为 null，则隐藏 Tooltip | `(value: number) => string` | -
 
@@ -10318,6 +10406,7 @@ order: 3
 | `[type]` | 等同 input 的 `type` 值，例如：`password` | `string` | - |
 | `[placeholder]` | 在文字框中显示提示讯息 | `string` | - |
 | `[variant]` | 变体 | `outlined,borderless,filled,underlined` | `outlined` |
+| `[allowClear]` | 可以点击清除图标删除内容 | `boolean` | `false` |
 | `[autocomplete]` | 自动完成功能的表单 | `HTML Attribute` | - |
 | `[autofocus]` | 当页面加载时获得焦点 | `HTML Attribute` | - |
 | `[addOnBefore]` | 前置标签，等同 `nzAddOnBefore` | `string` | - |
@@ -10498,6 +10587,7 @@ type: Widgets
 | `[placeholder]` | 在文字框中显示提示讯息 | `string` | - |
 | `[autosize]` | 自适应内容高度，可设置对象：`{ minRows: 2, maxRows: 6 }` | `{ minRows?: number; maxRows?: number }` | `{ minRows: 1, maxRows: 0 }` |
 | `[variant]` | 变体 | `outlined,borderless,filled,underlined` | `outlined` |
+| `[allowClear]` | 允许点击清除图标删除内容；与 `maxCharacterCount` 互斥（同时设置时以 `maxCharacterCount` 优先） | `boolean` | `false` |
 | `[maxCharacterCount]` | `textarea` 数字提示显示的最大值 | `number` | - |
 | `[computeCharacterCount]` | 自定义计算 `characterCount` 的函数 | `(v: string) => number` | `v => v.length` |
 | `[change]` | 内容变更事件 | `(val: string) => void` | - |
@@ -10715,6 +10805,7 @@ type: Non-built-in widgets
 | `[notFoundContent]` | 当列表为空时显示的内容 | `string` | - |
 | `[canMove]` | 穿梭时二次校验。 | `function` | - |
 | `[oneWay]` | 展示为单向样式 | `boolean` | `false` |
+| `[showSelectAll]` | 是否显示底部全选勾选框 | `boolean` | `true` |
 | `(change)` | 选项在两栏之间转移时的回调函数 | `(options: TransferChange) => void` | - |
 | `(searchChange)` | 搜索框内容时改变时的回调函数 | `(options: TransferSearchChange) => void` | - |
 | `(selectChange)` | 选中项发生改变时的回调函数 | `(options: TransferSelectChange) => void` | - |
@@ -10752,7 +10843,10 @@ type: Non-built-in widgets
 |----|----|----|-----|
 | `[asyncData]` | 异步数据源 | `() => Observable<SFSchemaEnumType[]>` | - |
 | `[size]` | 大小，等同 `nzSize` | `string` | `default` |
+| `[variant]` | 变体 | `outlined,borderless,filled,underlined` | `outlined` |
 | `[placeholder]` | 在文字框中显示提示讯息 | `string` | - |
+| `[showSearch]` | 支持搜索 | `boolean` | `false` |
+| `[placement]` | 浮层位置 | `bottomLeft,bottomRight,topLeft,topRight` | `bottomLeft` |
 | `[notFoundContent]` | 当下拉列表为空时显示的内容 | `string` | - |
 | `[allowClear]` | 支持清除 | `boolean` | `false` |
 | `[clearValue]` | 清空时默认值 | `any` | `undefined` |
@@ -10773,6 +10867,8 @@ type: Non-built-in widgets
 | `[maxTagPlaceholder]` | 隐藏 tag 时显示的内容 | `TemplateRef<{ $implicit: NzTreeNode[] }>` | - |
 | `[treeTemplate]` | 自定义节点 | `TemplateRef<{ $implicit: NzTreeNode; origin: NzTreeNodeOptions }>` | - |
 | `[expandChange]` | 点击展开树节点图标调用 | `(e: NzFormatEmitEvent) => Observable<SFSchemaEnum[]>` | - |
+| `[openChange]` | 下拉菜单打开关闭回调函数 | `(status: boolean) => void` | - |
+| `[suffixIcon]` | 自定义的选择框后缀图标 | `TemplateRef<any>, string` | - |
 | `[virtualHeight]` | 虚拟滚动的总高度 | `string` | `-` |
 | `[virtualItemSize]` | 虚拟滚动时每一列的高度，与 [cdk itemSize](https://material.angular.io/cdk/scrolling/api) 相同 | `number` | `28` |
 | `[virtualMaxBufferPx]` | 缓冲区最大像素高度，与 [cdk maxBufferPx](https://material.angular.io/cdk/scrolling/api) 相同 | `number` | `500` |
@@ -10820,7 +10916,7 @@ type: Non-built-in widgets
 
 - **务必** 指定 `resReName` 来获取正确数据
 - `multiple` 决定返回数组或者单体数据
-- 若指定 `enum` 或 `asyncData` 将被转化成 `fileList` (`nzFileList`) 值，且**务必**初始保证一个 `response` 属性表示远程数据并 `resReName` 能正确获取
+- 初始文件请使用 `fileList` 属性；`enum` 与 `asyncData` 仅作为通用数据源存在，其结构（`{ label, value }`）与文件对象（`NzUploadFile`）不符，不会作为初始文件生效
 - 图像预览：默认使用 `nzModal` 来显示包含文件对象的 `url` 或 `thumbUrl` 值
 
 ## API
@@ -10844,6 +10940,7 @@ type: Non-built-in widgets
 | `[action]` | 必选参数, 上传的地址 | `string, ((file: UploadFile) => string, Observable<string>)` | - |
 | `[accept]` | 接受上传的文件类型, 详见 [input accept Attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#attr-accept) | `string, string[]` | - |
 | `[limit]` | 限制单次最多上传数量，`multiple` 打开时有效；`0` 表示不限 | `number` | `0` |
+| `[maxCount]` | 限制上传数量；当为 `1` 时，始终用最新上传的文件代替当前文件 | `number` | - |
 | `[filter]` | 自定义过滤器 | `UploadFilter[]` | - |
 | `[fileList]` | 文件列表 | `UploadFile[]` | - |
 | `[fileSize]` | 限制文件大小，单位：KB；`0` 表示不限 | `number` | `0` |
